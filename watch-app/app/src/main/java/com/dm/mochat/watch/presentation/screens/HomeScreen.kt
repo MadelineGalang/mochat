@@ -15,15 +15,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.MaterialTheme
-import com.dm.mochat.watch.data.LoginViewModel
+import com.dm.mochat.watch.data.HomeViewModel
 import com.dm.mochat.watch.presentation.components.ButtonComponent
 import com.dm.mochat.watch.presentation.components.LargeTextComponent
+import com.dm.mochat.watch.presentation.components.NormalTextComponent
 import com.dm.mochat.watch.presentation.theme.BlackPearl
 import com.dm.mochat.watch.presentation.theme.LightCyan
 import com.dm.mochat.watch.presentation.theme.LightSkyBlue
 
 @Composable
-fun HomeScreen(loginViewModel:LoginViewModel = viewModel()) {
+fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
+    homeViewModel.getCurrentUser()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -32,12 +35,13 @@ fun HomeScreen(loginViewModel:LoginViewModel = viewModel()) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        LargeTextComponent(text = "Home screen", color = LightCyan)
+        LargeTextComponent(text = "Hello, ${homeViewModel.homeUIState.value.currentUserName}", color = LightCyan)
+        NormalTextComponent(text = homeViewModel.homeUIState.value.currentUserEmail, color = LightCyan)
         Spacer(modifier = Modifier.height(10.dp))
         ButtonComponent(
             text = "LOGOUT",
             onButtonClick = {
-                loginViewModel.logout()
+                homeViewModel.logout()
             },
             textColor = BlackPearl,
             buttonColor = LightSkyBlue

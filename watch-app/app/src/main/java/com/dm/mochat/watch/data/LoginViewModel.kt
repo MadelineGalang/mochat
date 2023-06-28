@@ -51,21 +51,4 @@ class LoginViewModel : ViewModel() {
                 Log.d(TAG, "Exception = ${it.localizedMessage}")
             }
     }
-
-    fun logout() {
-        val firebaseAuth = FirebaseAuth.getInstance()
-
-        firebaseAuth.signOut()
-
-        val authStateListener = FirebaseAuth.AuthStateListener {
-            if (it.currentUser == null) {
-                Log.d(TAG, "logout success")
-                AppRouter.navigateTo(Screen.StartScreen)
-            } else {
-                Log.d(TAG, "logout failed")
-            }
-        }
-
-        firebaseAuth.addAuthStateListener(authStateListener)
-    }
 }
