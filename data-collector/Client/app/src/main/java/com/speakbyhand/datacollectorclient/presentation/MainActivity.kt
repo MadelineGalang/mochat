@@ -6,6 +6,7 @@
 
 package com.speakbyhand.datacollectorclient.presentation
 
+import android.hardware.Sensor
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.speech.tts.TextToSpeech
@@ -37,7 +38,11 @@ import java.util.*
 
 class MainActivity : ComponentActivity() {
     lateinit var apiService: GestureDataApiService
-    lateinit var dataRecorder: GestureDataRecorder
+    lateinit var accelDataRecorder: GestureDataRecorder
+    lateinit var gyroDataRecorder: GestureDataRecorder
+    lateinit var linearDataRecorder: GestureDataRecorder
+
+
 
     lateinit var tts: TextToSpeech
 
@@ -45,7 +50,10 @@ class MainActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         apiService = GestureDataApiService()
-        dataRecorder = GestureDataRecorder(this)
+        accelDataRecorder = GestureDataRecorder(this, SENSOR_SERVICE, Sensor.TYPE_ACCELEROMETER);
+        gyroDataRecorder = GestureDataRecorder(this, SENSOR_SERVICE, Sensor.TYPE_GYROSCOPE);
+        linearDataRecorder = GestureDataRecorder(this, SENSOR_SERVICE, Sensor.TYPE_LINEAR_ACCELERATION);
+
 
         super.onCreate(savedInstanceState)
         setContent {
@@ -54,18 +62,28 @@ class MainActivity : ComponentActivity() {
     }
 
     fun startRecording() {
-        dataRecorder.start()
+        accelDataRecorder.start()
+        gyroDataRecorder.start()
+        linearDataRecorder.start()
     }
 
     fun stopRecording() {
-        dataRecorder.stop()
+        accelDataRecorder.stop()
+        gyroDataRecorder.stop()
+        linearDataRecorder.stop()
         playSpeech()
 
-        val mergedData: String = dataRecorder.getDataAsCsvString()
-        Log.i("merged data", mergedData)
+        val mergedAccelData: String = accelDataRecorder.getDataAsCsvString()
+        val mergedGyroData: String = gyroDataRecorder.getDataAsCsvString()
+        val mergedLinearData: String = linearDataRecorder.getDataAsCsvString()
 
-        apiService.postData(mergedData)
-        dataRecorder.reset()
+
+        apiService.postGestureData(mergedAccelData, mergedGyroData, mergedLinearData)
+        gyroDataRecorder.reset()
+        accelDataRecorder.reset()
+        linearDataRecorder.reset()
+
+
     }
 
     fun playSpeech() {

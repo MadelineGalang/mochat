@@ -1,0 +1,11 @@
+{
+  "name": "mochat",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "flask --app server.py --debug run --host=0.0.0.0",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

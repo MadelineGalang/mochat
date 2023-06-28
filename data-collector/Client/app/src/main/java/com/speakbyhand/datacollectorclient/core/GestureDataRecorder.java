@@ -8,43 +8,19 @@ import android.hardware.SensorManager;
 
 import java.util.ArrayList;
 
-class ImuSensorReading {
-    public float x;
-    public float y;
-    public float z;
-
-    public ImuSensorReading(float x, float y, float z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-}
-
 public class GestureDataRecorder {
-    private final SensorManager accManager, gyroManager;
-    private final Sensor accSensor, gyroSensor;
+    private final SensorManager sensorManager;
+    private final Sensor gestureSensor;
     private final int AVERAGE_DATA_POINTS_COUNT = 250;
-    private final ArrayList<ImuSensorReading> accDataPoints = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
-    private final ArrayList<ImuSensorReading> gyroDataPoints = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
-    private final ArrayList<Float> timeDataPoints = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
-
     private long startMilli;
+    private final ArrayList<ImuSensorReading> gestureDataPoints = new ArrayList<>(AVERAGE_DATA_POINTS_COUNT);
 
-    private final SensorEventListener accListener = new SensorEventListener() {
+    private final SensorEventListener sensorEventListener = new SensorEventListener() {
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
-            accDataPoints.add(new ImuSensorReading(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]));
-            recordTimeMilliseconds();
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int i) {
-        }
-    };
-    private final SensorEventListener gyroListener = new SensorEventListener() {
-        @Override
-        public void onSensorChanged(SensorEvent sensorEvent) {
-            gyroDataPoints.add(new ImuSensorReading(sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]));
+            long timeMiliseconds = getTimeMilliseconds();
+            gestureDataPoints.add(new ImuSensorReading(timeMiliseconds, sensorEvent.values[0], sensorEvent.values[1], sensorEvent.values[2]));
+            getTimeMilliseconds();
         }
 
         @Override
@@ -52,53 +28,42 @@ public class GestureDataRecorder {
         }
     };
 
-    public GestureDataRecorder(Context onCreateContext) {
-        accManager = (SensorManager) onCreateContext.getSystemService(Context.SENSOR_SERVICE);
-        gyroManager = (SensorManager) onCreateContext.getSystemService(Context.SENSOR_SERVICE);
-        accSensor = accManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        gyroSensor = gyroManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+    public GestureDataRecorder(Context onCreateContext, String sensorService, int sensorType) {
+        sensorManager = (SensorManager) onCreateContext.getSystemService(sensorService);
+        gestureSensor = sensorManager.getDefaultSensor(sensorType);
     }
 
     public void start() {
         startMilli = System.currentTimeMillis();
-        accManager.registerListener(accListener, accSensor, SensorManager.SENSOR_DELAY_FASTEST);
-        gyroManager.registerListener(gyroListener, gyroSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        sensorManager.registerListener(sensorEventListener, gestureSensor, SensorManager.SENSOR_DELAY_FASTEST);
     }
 
     public void stop() {
-        accManager.unregisterListener(accListener);
-        gyroManager.unregisterListener(gyroListener);
+        sensorManager.unregisterListener(sensorEventListener);
     }
 
     public void reset() {
-        accDataPoints.clear();
-        gyroDataPoints.clear();
-        timeDataPoints.clear();
+        gestureDataPoints.clear();
     }
 
-    private void recordTimeMilliseconds() {
+    private long getTimeMilliseconds() {
         long currMilli = System.currentTimeMillis();
-        timeDataPoints.add((float) (currMilli - startMilli));
+        return currMilli - startMilli;
     }
 
     public String getDataAsCsvString() {
         StringBuilder csvContentBuilder = new StringBuilder();
         // BUG: accDataPoints and gyroDataPoints are not the same size sometimes (Wont Fix)
-        for (int i = 0; i < Math.min(accDataPoints.size(), gyroDataPoints.size()); i++) {
-            float currentTime = timeDataPoints.get(i);
-            ImuSensorReading accSample = accDataPoints.get(i);
-            ImuSensorReading gyroSample = gyroDataPoints.get(i);
+        for (int i = 0; i < Math.min(gestureDataPoints.size(), gestureDataPoints.size()); i++) {
+            ImuSensorReading gestureSample = gestureDataPoints.get(i);
 
             // Join x,y,z values of acc and gyro data samples by comma
             csvContentBuilder.append(String.join(",",
-                    String.valueOf(currentTime),
-                    String.valueOf(accSample.x),
-                    String.valueOf(accSample.y),
-                    String.valueOf(accSample.z),
-                    String.valueOf(gyroSample.x),
-                    String.valueOf(gyroSample.y),
-                    String.valueOf(gyroSample.z))
-            );
+                    String.valueOf(gestureSample.time),
+                    String.valueOf(gestureSample.x),
+                    String.valueOf(gestureSample.y),
+                    String.valueOf(gestureSample.z)
+            ));
             csvContentBuilder.append("\n");
         }
         return csvContentBuilder.toString();
