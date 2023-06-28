@@ -9,25 +9,28 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.MaterialTheme
+import com.dm.mochat.watch.data.RegisterUIEvent
+import com.dm.mochat.watch.data.RegisterViewModel
 import com.dm.mochat.watch.presentation.components.LargeTextComponent
-import com.dm.mochat.watch.presentation.components.ButtonComponent
+import com.dm.mochat.watch.presentation.components.IconButtonComponent
 import com.dm.mochat.watch.presentation.components.TextFieldComponent
 import com.dm.mochat.watch.presentation.navigation.AppRouter
 import com.dm.mochat.watch.presentation.navigation.Screen
 import com.dm.mochat.watch.presentation.navigation.SystemBackButtonHandler
-import com.dm.mochat.watch.presentation.theme.BlackPearl
-import com.dm.mochat.watch.presentation.theme.LightSkyBlue
 import com.dm.mochat.watch.presentation.theme.LightCyan
 
 @Composable
-fun RegisterScreen() {
+fun RegisterScreen(registerViewModel:RegisterViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -39,17 +42,28 @@ fun RegisterScreen() {
     ) {
         LargeTextComponent(text = "Register", color = LightCyan)
         Spacer(modifier = Modifier.height(10.dp))
-        TextFieldComponent(placeholder = "Name", onTextChange = {})
+
+        TextFieldComponent(placeholder = "Name", onTextChange = {
+            registerViewModel.onEvent(RegisterUIEvent.NameChanged(it))
+        })
         Spacer(modifier = Modifier.height(10.dp))
-        TextFieldComponent(placeholder = "Email", onTextChange = {})
+
+        TextFieldComponent(placeholder = "Email", onTextChange = {
+            registerViewModel.onEvent(RegisterUIEvent.EmailChanged(it))
+        })
         Spacer(modifier = Modifier.height(10.dp))
-        TextFieldComponent(placeholder = "Password", onTextChange = {})
+
+        TextFieldComponent(placeholder = "Password", onTextChange = {
+            registerViewModel.onEvent(RegisterUIEvent.PasswordChanged(it))
+        }, isPassword = true)
         Spacer(modifier = Modifier.height(10.dp))
-        ButtonComponent(
-            text = "REGISTER",
-            onButtonClick = { AppRouter.navigateTo(Screen.HomeScreen) },
-            textColor = BlackPearl,
-            buttonColor = LightSkyBlue
+
+        IconButtonComponent(
+            iconVector = Icons.Filled.Check,
+            description = "Register",
+            onButtonClick = {
+                registerViewModel.onEvent(RegisterUIEvent.RegisterButtonClicked)
+            },
         )
     }
 

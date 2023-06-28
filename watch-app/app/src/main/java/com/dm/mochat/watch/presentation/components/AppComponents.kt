@@ -16,17 +16,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
+import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.dm.mochat.watch.presentation.theme.LightCyan
 import com.dm.mochat.watch.presentation.theme.LightSkyBlue
@@ -77,11 +81,25 @@ fun ButtonComponent(text:String, onButtonClick: () -> Unit, textColor:Color, but
     }
 }
 
+@Composable
+fun IconButtonComponent(iconVector:ImageVector, description:String, onButtonClick: () -> Unit ) {
+    Button(
+        onClick = { onButtonClick.invoke() },
+        colors = ButtonDefaults.primaryButtonColors()
+    ) {
+        Icon(
+            imageVector = iconVector,
+            contentDescription = description
+        )
+    }
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TextFieldComponent(
     placeholder:String,
-    onTextChange: (String) -> Unit
+    onTextChange: (String) -> Unit,
+    isPassword:Boolean = false
 ) {
     val textValue = remember {
         mutableStateOf("")
@@ -107,6 +125,7 @@ fun TextFieldComponent(
             fontSize = 16.sp,
             color = LightCyan
         ),
+        visualTransformation = if(isPassword) PasswordVisualTransformation() else VisualTransformation.None,
         decorationBox = { innerTextField ->
             Box(
                 modifier = Modifier

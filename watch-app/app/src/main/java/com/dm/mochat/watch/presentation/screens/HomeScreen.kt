@@ -13,17 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.MaterialTheme
+import com.dm.mochat.watch.data.LoginViewModel
 import com.dm.mochat.watch.presentation.components.ButtonComponent
 import com.dm.mochat.watch.presentation.components.LargeTextComponent
-import com.dm.mochat.watch.presentation.navigation.AppRouter
-import com.dm.mochat.watch.presentation.navigation.Screen
 import com.dm.mochat.watch.presentation.theme.BlackPearl
 import com.dm.mochat.watch.presentation.theme.LightCyan
 import com.dm.mochat.watch.presentation.theme.LightSkyBlue
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(loginViewModel:LoginViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,7 +36,9 @@ fun HomeScreen() {
         Spacer(modifier = Modifier.height(10.dp))
         ButtonComponent(
             text = "LOGOUT",
-            onButtonClick = { AppRouter.navigateTo(Screen.StartScreen) },
+            onButtonClick = {
+                loginViewModel.logout()
+            },
             textColor = BlackPearl,
             buttonColor = LightSkyBlue
         )

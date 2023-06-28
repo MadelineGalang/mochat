@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "126301349923",
+    "project_id": "mochat-cd10f",
+    "storage_bucket": "mochat-cd10f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:126301349923:android:1f292d34a5db6064dee996",
+        "android_client_info": {
+          "package_name": "com.dm.mochat.watch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "126301349923-5nutnvpvs6u8ui09use2h8f12vlt9mv0.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiwIOB61ntlx1HtqYV_sUg69t7XZB89cw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "126301349923-5nutnvpvs6u8ui09use2h8f12vlt9mv0.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
