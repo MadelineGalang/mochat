@@ -19,10 +19,11 @@ class GestureDataApiService {
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType();
 
 
-    fun postGestureData(accData: String, gyroData: String, linearData: String) {
+    fun postGestureData(gestureName:String, accData: String, gyroData: String, linearData: String) {
         val timestamp = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(LocalDateTime.now());
         val data = JSONObject(
             mapOf(
+                "gestureName" to gestureName,
                 "acc" to accData,
                 "gyro" to gyroData,
                 "linear" to linearData,

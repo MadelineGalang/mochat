@@ -62,4 +62,6 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
     implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.10'
+    implementation "androidx.wear.compose:compose-navigation:$wear_compose_version"
+
 }
