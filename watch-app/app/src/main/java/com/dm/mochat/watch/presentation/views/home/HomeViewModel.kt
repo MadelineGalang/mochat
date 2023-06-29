@@ -1,7 +1,8 @@
-package com.dm.mochat.watch.data
+package com.dm.mochat.watch.presentation.views.home
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.dm.mochat.watch.presentation.navigation.AppRouter
 import com.dm.mochat.watch.presentation.navigation.Screen
@@ -12,25 +13,26 @@ import com.google.firebase.ktx.Firebase
 class HomeViewModel : ViewModel() {
     private val TAG = HomeViewModel::class.simpleName
 
-    var homeUIState = mutableStateOf(HomeUIState())
+    private val auth:FirebaseAuth = Firebase.auth
+
+    private val _currentUserEmail = MutableLiveData("")
+    val currentUserEmail:LiveData<String> = _currentUserEmail
+
+    private val _currentUserName = MutableLiveData("")
+    val currentUserName:LiveData<String> = _currentUserName
 
     fun getCurrentUser() {
-        val currentUser = Firebase.auth.currentUser
-        currentUser?.let {
+        val currentUser = auth.currentUser
+        currentUser?.let{
             for (profile in it.providerData) {
-                homeUIState.value = homeUIState.value.copy(
-                    currentUserEmail = if(profile.email == null) "" else profile.email!!,
-                    currentUserName = if(profile.displayName == null) "" else profile.displayName!!
-                )
+                _currentUserEmail.value = profile.email
+                _currentUserName.value = profile.displayName
             }
         }
-
     }
 
     fun logout() {
-        val firebaseAuth = FirebaseAuth.getInstance()
-
-        firebaseAuth.signOut()
+        auth.signOut()
 
         val authStateListener = FirebaseAuth.AuthStateListener {
             if (it.currentUser == null) {
@@ -41,6 +43,6 @@ class HomeViewModel : ViewModel() {
             }
         }
 
-        firebaseAuth.addAuthStateListener(authStateListener)
+        auth.addAuthStateListener(authStateListener)
     }
 }

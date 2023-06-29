@@ -13,15 +13,17 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.runtime.Composable
 import com.dm.mochat.watch.presentation.navigation.AppRouter
 import com.dm.mochat.watch.presentation.navigation.Screen
-import com.dm.mochat.watch.presentation.screens.HomeScreen
-import com.dm.mochat.watch.presentation.screens.LoginScreen
-import com.dm.mochat.watch.presentation.screens.RegisterScreen
-import com.dm.mochat.watch.presentation.screens.StartScreen
+import com.dm.mochat.watch.presentation.views.home.HomeScreen
+import com.dm.mochat.watch.presentation.views.login.LoginScreen
+import com.dm.mochat.watch.presentation.views.register.RegisterScreen
+import com.dm.mochat.watch.presentation.views.start.StartScreen
 import com.dm.mochat.watch.presentation.theme.MoChatWatchTheme
+import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        FirebaseApp.initializeApp(this)
         setContent {
             WearApp()
         }

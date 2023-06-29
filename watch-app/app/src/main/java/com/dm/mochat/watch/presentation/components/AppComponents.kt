@@ -41,9 +41,9 @@ fun NormalTextComponent(text:String, color:Color) {
         text = text,
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 16.dp),
+            .heightIn(min = 14.dp),
         style = TextStyle(
-            fontSize = 16.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Normal,
             fontStyle = FontStyle.Normal
         ),
@@ -122,7 +122,7 @@ fun TextFieldComponent(
             }
         ),
         textStyle = TextStyle(
-            fontSize = 16.sp,
+            fontSize = 14.sp,
             color = LightCyan
         ),
         visualTransformation = if(isPassword) PasswordVisualTransformation() else VisualTransformation.None,
@@ -140,7 +140,7 @@ fun TextFieldComponent(
                 if (textValue.value.isEmpty()) {
                     Text(
                         text = placeholder,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         color = LightSkyBlue
                     )
                 }

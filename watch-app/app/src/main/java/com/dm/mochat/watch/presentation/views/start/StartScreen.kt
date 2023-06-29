@@ -1,4 +1,4 @@
-package com.dm.mochat.watch.presentation.screens
+package com.dm.mochat.watch.presentation.views.start
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

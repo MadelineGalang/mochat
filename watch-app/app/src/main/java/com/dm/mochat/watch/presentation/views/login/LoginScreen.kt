@@ -1,11 +1,10 @@
-package com.dm.mochat.watch.presentation.screens
+package com.dm.mochat.watch.presentation.views.login
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,9 +17,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.wear.compose.material.CircularProgressIndicator
 import androidx.wear.compose.material.MaterialTheme
-import com.dm.mochat.watch.data.LoginUIEvent
-import com.dm.mochat.watch.data.LoginViewModel
 import com.dm.mochat.watch.presentation.components.LargeTextComponent
 import com.dm.mochat.watch.presentation.components.IconButtonComponent
 import com.dm.mochat.watch.presentation.components.TextFieldComponent
@@ -30,36 +28,42 @@ import com.dm.mochat.watch.presentation.navigation.SystemBackButtonHandler
 import com.dm.mochat.watch.presentation.theme.LightCyan
 
 @Composable
-fun LoginScreen(loginViewModel:LoginViewModel = viewModel()) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colors.background)
-            .padding(20.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize()
     ) {
-        LargeTextComponent(text = "Login", color = LightCyan)
-        Spacer(modifier = Modifier.height(10.dp))
+        if(loginViewModel.loading.value == true) {
+            CircularProgressIndicator()
+        }
 
-        TextFieldComponent(placeholder = "Email", onTextChange = {
-            loginViewModel.onEvent(LoginUIEvent.EmailChanged(it))
-        })
-        Spacer(modifier = Modifier.height(10.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.background)
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            LargeTextComponent(text = "Login", color = LightCyan)
 
-        TextFieldComponent(placeholder = "Password", onTextChange = {
-            loginViewModel.onEvent(LoginUIEvent.PasswordChanged(it))
-        }, isPassword = true)
-        Spacer(modifier = Modifier.height(10.dp))
+            TextFieldComponent(placeholder = "Email", onTextChange = {
+                loginViewModel.updateEmail(it)
+            })
 
-        IconButtonComponent(
-            iconVector = Icons.Filled.Check,
-            description = "Login",
-            onButtonClick = {
-                loginViewModel.onEvent(LoginUIEvent.LoginButtonClicked)
-            },
-        )
+            TextFieldComponent(placeholder = "Password", onTextChange = {
+                loginViewModel.updatePassword(it)
+            }, isPassword = true)
+
+            IconButtonComponent(
+                iconVector = Icons.Filled.Check,
+                description = "Login",
+                onButtonClick = {
+                    loginViewModel.login()
+                },
+            )
+        }
     }
 
     SystemBackButtonHandler {

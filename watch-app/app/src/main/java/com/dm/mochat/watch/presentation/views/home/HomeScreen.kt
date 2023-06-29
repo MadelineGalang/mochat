@@ -1,4 +1,4 @@
-package com.dm.mochat.watch.presentation.screens
+package com.dm.mochat.watch.presentation.views.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,7 +15,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.MaterialTheme
-import com.dm.mochat.watch.data.HomeViewModel
 import com.dm.mochat.watch.presentation.components.ButtonComponent
 import com.dm.mochat.watch.presentation.components.LargeTextComponent
 import com.dm.mochat.watch.presentation.components.NormalTextComponent
@@ -35,8 +34,8 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        LargeTextComponent(text = "Hello, ${homeViewModel.homeUIState.value.currentUserName}", color = LightCyan)
-        NormalTextComponent(text = homeViewModel.homeUIState.value.currentUserEmail, color = LightCyan)
+        LargeTextComponent(text = "Hello, ${homeViewModel.currentUserName.value}", color = LightCyan)
+        NormalTextComponent(text = homeViewModel.currentUserEmail.value!!, color = LightCyan)
         Spacer(modifier = Modifier.height(10.dp))
         ButtonComponent(
             text = "LOGOUT",
