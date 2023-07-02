@@ -8,6 +8,11 @@ sealed class Screen {
     object RegisterScreen : Screen()
     object LoginScreen : Screen()
     object HomeScreen : Screen()
+    object ContactsScreen: Screen()
+    object IndividualGroupContactScreen: Screen()
+    object AddEditIndividualScreen: Screen()
+    object AddEditGroupScreen: Screen()
+    object ManageGroupMembersScreen: Screen()
 }
 
 object AppRouter {

@@ -18,6 +18,11 @@ import com.dm.mochat.watch.presentation.views.login.LoginScreen
 import com.dm.mochat.watch.presentation.views.register.RegisterScreen
 import com.dm.mochat.watch.presentation.views.start.StartScreen
 import com.dm.mochat.watch.presentation.theme.MoChatWatchTheme
+import com.dm.mochat.watch.presentation.views.contact.ContactsScreen
+import com.dm.mochat.watch.presentation.views.contact.IndividualGroupContactScreen
+import com.dm.mochat.watch.presentation.views.contact.AddEditIndividualScreen
+import com.dm.mochat.watch.presentation.views.contact.AddEditGroupScreen
+import com.dm.mochat.watch.presentation.views.contact.ManageGroupMembersScreen
 import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
@@ -46,6 +51,21 @@ fun WearApp() {
                 }
                 is Screen.HomeScreen -> {
                     HomeScreen()
+                }
+                is Screen.ContactsScreen -> {
+                    ContactsScreen()
+                }
+                is Screen.IndividualGroupContactScreen -> {
+                    IndividualGroupContactScreen()
+                }
+                is Screen.AddEditIndividualScreen -> {
+                    AddEditIndividualScreen()
+                }
+                is Screen.AddEditGroupScreen -> {
+                    AddEditGroupScreen()
+                }
+                is Screen.ManageGroupMembersScreen -> {
+                    ManageGroupMembersScreen()
                 }
             }
         }

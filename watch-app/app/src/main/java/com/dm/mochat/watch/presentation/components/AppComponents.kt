@@ -1,11 +1,7 @@
 package com.dm.mochat.watch.presentation.components
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -36,7 +32,7 @@ import com.dm.mochat.watch.presentation.theme.LightCyan
 import com.dm.mochat.watch.presentation.theme.LightSkyBlue
 
 @Composable
-fun NormalTextComponent(text:String, color:Color) {
+fun NormalTextComponent(text:String, color:Color, alignment: TextAlign = TextAlign.Center) {
     Text(
         text = text,
         modifier = Modifier
@@ -48,7 +44,7 @@ fun NormalTextComponent(text:String, color:Color) {
             fontStyle = FontStyle.Normal
         ),
         color = color,
-        textAlign = TextAlign.Center
+        textAlign = alignment
     )
 }
 
@@ -82,10 +78,10 @@ fun ButtonComponent(text:String, onButtonClick: () -> Unit, textColor:Color, but
 }
 
 @Composable
-fun IconButtonComponent(iconVector:ImageVector, description:String, onButtonClick: () -> Unit ) {
+fun IconButtonComponent(iconVector:ImageVector, description:String, onButtonClick: () -> Unit, primaryColor:Boolean = true ) {
     Button(
         onClick = { onButtonClick.invoke() },
-        colors = ButtonDefaults.primaryButtonColors()
+        colors = if (primaryColor) ButtonDefaults.primaryButtonColors() else ButtonDefaults.secondaryButtonColors()
     ) {
         Icon(
             imageVector = iconVector,
@@ -99,7 +95,8 @@ fun IconButtonComponent(iconVector:ImageVector, description:String, onButtonClic
 fun TextFieldComponent(
     placeholder:String,
     onTextChange: (String) -> Unit,
-    isPassword:Boolean = false
+    isPassword:Boolean = false,
+    icon: ImageVector? = null
 ) {
     val textValue = remember {
         mutableStateOf("")
@@ -137,14 +134,21 @@ fun TextFieldComponent(
                     )
                     .padding(horizontal = 16.dp, vertical = 12.dp),
             ) {
-                if (textValue.value.isEmpty()) {
-                    Text(
-                        text = placeholder,
-                        fontSize = 14.sp,
-                        color = LightSkyBlue
-                    )
+                Row(
+                ) {
+                    if (textValue.value.isEmpty()) {
+                        if (icon != null) {
+                            Icon(icon, contentDescription = null,tint=LightSkyBlue)
+                            Spacer(modifier = Modifier.width(5.dp))
+                        }
+                        Text(
+                            text = placeholder,
+                            fontSize = 14.sp,
+                            color = LightSkyBlue
+                        )
+                    }
+                    innerTextField()
                 }
-                innerTextField()
             }
         }
     )
