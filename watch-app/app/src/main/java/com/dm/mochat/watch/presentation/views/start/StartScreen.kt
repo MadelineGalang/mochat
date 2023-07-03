@@ -14,6 +14,8 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.Scaffold
+import androidx.wear.compose.material.TimeText
 import com.dm.mochat.watch.presentation.components.ButtonComponent
 import com.dm.mochat.watch.presentation.navigation.AppRouter
 import com.dm.mochat.watch.presentation.navigation.Screen
@@ -23,27 +25,31 @@ import com.dm.mochat.watch.presentation.theme.LightSkyBlue
 
 @Composable
 fun StartScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colors.background)
-            .padding(20.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Scaffold(
+        timeText = { TimeText() }
     ) {
-        ButtonComponent(
-            text = "LOGIN",
-            onButtonClick = { AppRouter.navigateTo(Screen.LoginScreen) },
-            textColor = BlackPearl,
-            buttonColor = LightSkyBlue
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        ButtonComponent(
-            text = "REGISTER",
-            onButtonClick = { AppRouter.navigateTo(Screen.RegisterScreen) },
-            textColor = LightCyan,
-            buttonColor = BlackPearl
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.background)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ButtonComponent(
+                text = "LOGIN",
+                onButtonClick = { AppRouter.navigateTo(Screen.LoginScreen) },
+                textColor = BlackPearl,
+                buttonColor = LightSkyBlue
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            ButtonComponent(
+                text = "REGISTER",
+                onButtonClick = { AppRouter.navigateTo(Screen.RegisterScreen) },
+                textColor = LightCyan,
+                buttonColor = BlackPearl
+            )
+        }
     }
 }
 

@@ -3,11 +3,8 @@ package com.dm.mochat.watch.presentation.views.login
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
@@ -19,6 +16,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.CircularProgressIndicator
 import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.PositionIndicator
+import androidx.wear.compose.material.Scaffold
+import androidx.wear.compose.material.ScalingLazyColumn
+import androidx.wear.compose.material.TimeText
+import androidx.wear.compose.material.Vignette
+import androidx.wear.compose.material.VignettePosition
+import androidx.wear.compose.material.rememberScalingLazyListState
 import com.dm.mochat.watch.presentation.components.LargeTextComponent
 import com.dm.mochat.watch.presentation.components.IconButtonComponent
 import com.dm.mochat.watch.presentation.components.TextFieldComponent
@@ -29,6 +33,8 @@ import com.dm.mochat.watch.presentation.theme.LightCyan
 
 @Composable
 fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
+    val scalingLazyListState = rememberScalingLazyListState()
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
@@ -37,32 +43,44 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
             CircularProgressIndicator()
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.background)
-                .padding(20.dp)
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Scaffold(
+            timeText = { TimeText() },
+            vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
+            positionIndicator = { PositionIndicator(scalingLazyListState = scalingLazyListState) }
         ) {
-            LargeTextComponent(text = "Login", color = LightCyan)
+            ScalingLazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colors.background),
+                contentPadding = PaddingValues(start = 20.dp, end = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                state = scalingLazyListState
+            ) {
+                item { LargeTextComponent(text = "Login", color = LightCyan) }
 
-            TextFieldComponent(placeholder = "Email", onTextChange = {
-                loginViewModel.updateEmail(it)
-            })
+                item {
+                    TextFieldComponent(placeholder = "Email", onTextChange = {
+                        loginViewModel.updateEmail(it)
+                    })
+                }
 
-            TextFieldComponent(placeholder = "Password", onTextChange = {
-                loginViewModel.updatePassword(it)
-            }, isPassword = true)
+                item {
+                    TextFieldComponent(placeholder = "Password", onTextChange = {
+                        loginViewModel.updatePassword(it)
+                    }, isPassword = true)
+                }
 
-            IconButtonComponent(
-                iconVector = Icons.Filled.Check,
-                description = "Login",
-                onButtonClick = {
-                    loginViewModel.login()
-                },
-            )
+                item {
+                    IconButtonComponent(
+                        iconVector = Icons.Filled.Check,
+                        description = "Login",
+                        onButtonClick = {
+                            loginViewModel.login()
+                        },
+                    )
+                }
+            }
         }
     }
 

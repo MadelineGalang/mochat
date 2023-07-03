@@ -2,8 +2,6 @@ package com.dm.mochat.watch.presentation.views.contact
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
@@ -26,26 +24,30 @@ import com.dm.mochat.watch.presentation.theme.LightSkyBlue
 
 @Composable
 fun ContactsScreen(contactViewModel: ContactsViewModel = viewModel()) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colors.background)
-            .padding(20.dp),
+    Scaffold(
+        timeText = { TimeText() }
     ) {
-        IconButtonComponent(
-            iconVector = Icons.Filled.Person,
-            description = "Individual",
-            onButtonClick = { contactViewModel.navigateContacts(true) },
-        )
-        Spacer(modifier = Modifier.width(10.dp))
-        IconButtonComponent(
-            iconVector = Icons.Filled.Groups,
-            description = "Group",
-            onButtonClick = {  contactViewModel.navigateContacts(false)},
-            primaryColor = false
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.background)
+                .padding(20.dp),
+        ) {
+            IconButtonComponent(
+                iconVector = Icons.Filled.Person,
+                description = "Individual",
+                onButtonClick = { contactViewModel.navigateContacts(true) },
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            IconButtonComponent(
+                iconVector = Icons.Filled.Groups,
+                description = "Group",
+                onButtonClick = { contactViewModel.navigateContacts(false) },
+                primaryColor = false
+            )
+        }
     }
     SystemBackButtonHandler {
         AppRouter.navigateTo(Screen.HomeScreen)
@@ -54,12 +56,17 @@ fun ContactsScreen(contactViewModel: ContactsViewModel = viewModel()) {
 
 @Composable
 fun IndividualGroupContactScreen(contactViewModel: ContactsViewModel = viewModel()) {
-        val scalingLazyListState = rememberScalingLazyListState()
+    val scalingLazyListState = rememberScalingLazyListState()
+
+    Scaffold(
+        timeText = { TimeText() },
+        vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
+        positionIndicator = { PositionIndicator(scalingLazyListState = scalingLazyListState) }
+    ) {
         ScalingLazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colors.background)
-                .padding(20.dp),
+                .background(MaterialTheme.colors.background),
             contentPadding = PaddingValues(
                 top = 10.dp,
                 bottom = 40.dp
@@ -67,14 +74,15 @@ fun IndividualGroupContactScreen(contactViewModel: ContactsViewModel = viewModel
             horizontalAlignment = Alignment.CenterHorizontally,
             state = scalingLazyListState
         ) {
-            item{
+            item {
                 IconButtonComponent(
-                iconVector = contactViewModel.icon,
-                description = contactViewModel.iconDescription,
-                onButtonClick = { contactViewModel.AddIndividualGroup() }
-            )}
-            item{Spacer(modifier = Modifier.height(10.dp))}
-            item { NormalTextComponent(text = contactViewModel.header, color = LightSkyBlue)}
+                    iconVector = contactViewModel.icon,
+                    description = contactViewModel.iconDescription,
+                    onButtonClick = { contactViewModel.AddIndividualGroup() }
+                )
+            }
+            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item { NormalTextComponent(text = contactViewModel.header, color = LightSkyBlue) }
             items(10) { index ->
                 Chip(
                     colors = ChipDefaults.chipColors(
@@ -86,14 +94,15 @@ fun IndividualGroupContactScreen(contactViewModel: ContactsViewModel = viewModel
                         .padding(top = 10.dp),
                     label = {
                         NormalTextComponent(
-                            text = contactViewModel.data+" ${index + 1}",
+                            text = contactViewModel.data + " ${index + 1}",
                             color = LightCyan,
                             alignment = TextAlign.Left
                         )
                     },
-                    onClick = { contactViewModel.EditIndividualGroup(index)}
+                    onClick = { contactViewModel.EditIndividualGroup(index) }
                 )
             }
+        }
     }
     SystemBackButtonHandler {
         AppRouter.navigateTo(Screen.ContactsScreen)
@@ -102,63 +111,76 @@ fun IndividualGroupContactScreen(contactViewModel: ContactsViewModel = viewModel
 
 @Composable
 fun AddEditIndividualScreen( contactViewModel: ContactsViewModel = viewModel()) {
-        Column(
+    val scalingLazyListState = rememberScalingLazyListState()
+    Scaffold(
+        timeText = { TimeText() },
+        vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
+        positionIndicator = { PositionIndicator(scalingLazyListState = scalingLazyListState) }
+    ) {
+        ScalingLazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colors.background)
-                .padding(20.dp)
-                .verticalScroll(rememberScrollState()),
+                .background(MaterialTheme.colors.background),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            state = scalingLazyListState
         ) {
-            LargeTextComponent(text = contactViewModel.individualHeader, color = LightCyan)
-            TextFieldComponent(placeholder = "Name", onTextChange = {
-                contactViewModel.updateName(it)
-            }, icon = Icons.Filled.Person)
+            item { LargeTextComponent(text = contactViewModel.individualHeader, color = LightCyan) }
 
-            TextFieldComponent(placeholder = "Email", onTextChange = {
-                contactViewModel.updateEmail(it)
-            }, icon = Icons.Filled.Email)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-            )
-            {
-                if (contactViewModel.individualHeader == "New Contact"){
-                    IconButtonComponent(
-                        iconVector = Icons.Filled.Close,
-                        description = "Cancel",
-                        onButtonClick = { AppRouter.navigateTo(Screen.IndividualGroupContactScreen)},
-                        primaryColor = false
-                    )
-                    Spacer(modifier = Modifier.width(20.dp))
-                    IconButtonComponent(
-                        iconVector = Icons.Filled.Check,
-                        description = "Save",
-                        onButtonClick = {contactViewModel.addNewContact()},
-                    )
-                }
-                else
+            item {
+                TextFieldComponent(placeholder = "Name", onTextChange = {
+                    contactViewModel.updateName(it)
+                }, icon = Icons.Filled.Person)
+            }
+
+            item {
+                TextFieldComponent(placeholder = "Email", onTextChange = {
+                    contactViewModel.updateEmail(it)
+                }, icon = Icons.Filled.Email)
+            }
+
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
                 {
-                    IconButtonComponent(
-                        iconVector = Icons.Filled.Delete,
-                        description = "Delete",
-                        onButtonClick = {contactViewModel.deleteContact()},
-                        primaryColor = false
-                    )
-                    Spacer(modifier = Modifier.width(20.dp))
-                    IconButtonComponent(
-                        iconVector = Icons.Filled.Check,
-                        description = "Save",
-                        onButtonClick = {contactViewModel.editContact()},
-                    )
-                }
+                    if (contactViewModel.individualHeader == "New Contact") {
+                        IconButtonComponent(
+                            iconVector = Icons.Filled.Close,
+                            description = "Cancel",
+                            onButtonClick = { AppRouter.navigateTo(Screen.IndividualGroupContactScreen) },
+                            primaryColor = false
+                        )
+                        Spacer(modifier = Modifier.width(20.dp))
+                        IconButtonComponent(
+                            iconVector = Icons.Filled.Check,
+                            description = "Save",
+                            onButtonClick = { contactViewModel.addNewContact() },
+                        )
+                    } else {
+                        IconButtonComponent(
+                            iconVector = Icons.Filled.Delete,
+                            description = "Delete",
+                            onButtonClick = { contactViewModel.deleteContact() },
+                            primaryColor = false
+                        )
+                        Spacer(modifier = Modifier.width(20.dp))
+                        IconButtonComponent(
+                            iconVector = Icons.Filled.Check,
+                            description = "Save",
+                            onButtonClick = { contactViewModel.editContact() },
+                        )
+                    }
 
+                }
             }
 
         }
+    }
     SystemBackButtonHandler {
         AppRouter.navigateTo(Screen.IndividualGroupContactScreen)
     }
@@ -167,88 +189,95 @@ fun AddEditIndividualScreen( contactViewModel: ContactsViewModel = viewModel()) 
 @Composable
 fun AddEditGroupScreen( contactViewModel: ContactsViewModel = viewModel()) {
     val scalingLazyListState = rememberScalingLazyListState()
-    ScalingLazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colors.background)
-            .padding(20.dp),
-        contentPadding = PaddingValues(
-            top = 10.dp,
-            bottom = 40.dp
-        ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        state = scalingLazyListState
+
+    Scaffold(
+        timeText = { TimeText() },
+        vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
+        positionIndicator = { PositionIndicator(scalingLazyListState = scalingLazyListState) }
     ) {
-        item{LargeTextComponent(text = contactViewModel.groupHeader, color = LightCyan) }
-        item{Spacer(modifier = Modifier.height(10.dp))}
-        item {TextFieldComponent(placeholder = "Group", onTextChange = { contactViewModel.updateGroupName(it)}, icon = Icons.Filled.Group)}
-        item{Spacer(modifier = Modifier.height(10.dp))}
-        item{LargeTextComponent(text = "Members", color = LightCyan)}
-        item{Spacer(modifier = Modifier.height(10.dp))}
-        item{
-            ButtonComponent(
-                text = "MANAGE MEMBERS",
-                onButtonClick = { AppRouter.navigateTo(Screen.ManageGroupMembersScreen) },
-                textColor = BlackPearl,
-                buttonColor = LightSkyBlue
-            )
-        }
-        items(2) { index ->
-            Chip(
-                colors = ChipDefaults.chipColors(
-                    backgroundColor = BlackPearl,
-                    contentColor = LightCyan
-                ),
-                modifier = Modifier
-                    .width(140.dp)
-                    .padding(top = 10.dp),
-                label = {
-                    NormalTextComponent(
-                        text = "Member ${index + 1}",
-                        color = LightCyan,
-                        alignment = TextAlign.Left
-                    )
-                },
-                onClick = {}
-            )
-        }
-        item {Spacer(modifier = Modifier.height(10.dp)) }
-        item{
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-            )
-            {
-                if (contactViewModel.groupHeader == "New Group"){
-                    IconButtonComponent(
-                        iconVector = Icons.Filled.Close,
-                        description = "Cancel",
-                        onButtonClick = { AppRouter.navigateTo(Screen.IndividualGroupContactScreen)},
-                        primaryColor = false
-                    )
-                    Spacer(modifier = Modifier.width(20.dp))
-                    IconButtonComponent(
-                        iconVector = Icons.Filled.Check,
-                        description = "Save",
-                        onButtonClick = {contactViewModel.addNewGroup()},
-                    )
-                }
-                else
+        ScalingLazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.background),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            state = scalingLazyListState
+        ) {
+            item { LargeTextComponent(text = contactViewModel.groupHeader, color = LightCyan) }
+            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item {
+                TextFieldComponent(
+                    placeholder = "Group",
+                    onTextChange = { contactViewModel.updateGroupName(it) },
+                    icon = Icons.Filled.Group
+                )
+            }
+            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item { LargeTextComponent(text = "Members", color = LightCyan) }
+            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item {
+                ButtonComponent(
+                    text = "MANAGE MEMBERS",
+                    onButtonClick = { AppRouter.navigateTo(Screen.ManageGroupMembersScreen) },
+                    textColor = BlackPearl,
+                    buttonColor = LightSkyBlue
+                )
+            }
+            items(2) { index ->
+                Chip(
+                    colors = ChipDefaults.chipColors(
+                        backgroundColor = BlackPearl,
+                        contentColor = LightCyan
+                    ),
+                    modifier = Modifier
+                        .width(140.dp)
+                        .padding(top = 10.dp),
+                    label = {
+                        NormalTextComponent(
+                            text = "Member ${index + 1}",
+                            color = LightCyan,
+                            alignment = TextAlign.Left
+                        )
+                    },
+                    onClick = {}
+                )
+            }
+            item { Spacer(modifier = Modifier.height(10.dp)) }
+            item {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
                 {
-                    IconButtonComponent(
-                        iconVector = Icons.Filled.Delete,
-                        description = "Delete",
-                        onButtonClick = {contactViewModel.deleteGroup()},
-                        primaryColor = false
-                    )
-                    Spacer(modifier = Modifier.width(20.dp))
-                    IconButtonComponent(
-                        iconVector = Icons.Filled.Check,
-                        description = "Save",
-                        onButtonClick = {contactViewModel.editGroup()},
-                    )
+                    if (contactViewModel.groupHeader == "New Group") {
+                        IconButtonComponent(
+                            iconVector = Icons.Filled.Close,
+                            description = "Cancel",
+                            onButtonClick = { AppRouter.navigateTo(Screen.IndividualGroupContactScreen) },
+                            primaryColor = false
+                        )
+                        Spacer(modifier = Modifier.width(20.dp))
+                        IconButtonComponent(
+                            iconVector = Icons.Filled.Check,
+                            description = "Save",
+                            onButtonClick = { contactViewModel.addNewGroup() },
+                        )
+                    } else {
+                        IconButtonComponent(
+                            iconVector = Icons.Filled.Delete,
+                            description = "Delete",
+                            onButtonClick = { contactViewModel.deleteGroup() },
+                            primaryColor = false
+                        )
+                        Spacer(modifier = Modifier.width(20.dp))
+                        IconButtonComponent(
+                            iconVector = Icons.Filled.Check,
+                            description = "Save",
+                            onButtonClick = { contactViewModel.editGroup() },
+                        )
+                    }
                 }
             }
         }
@@ -260,17 +289,25 @@ fun AddEditGroupScreen( contactViewModel: ContactsViewModel = viewModel()) {
 
 @Composable
 fun ManageGroupMembersScreen(){
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colors.background)
-            .padding(20.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    val scalingLazyListState = rememberScalingLazyListState()
+
+    Scaffold(
+        timeText = { TimeText() },
+        vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
+        positionIndicator = { PositionIndicator(scalingLazyListState = scalingLazyListState) }
     ) {
-        LargeTextComponent(text = "Manage Members", color = LightCyan)
-        //todo: add checklist w members names
+        ScalingLazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.background),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            state = scalingLazyListState
+        ) {
+            item { LargeTextComponent(text = "Manage Members", color = LightCyan) }
+            //todo: add checklist w members names
+        }
     }
     SystemBackButtonHandler {
         AppRouter.navigateTo(Screen.AddEditGroupScreen)
