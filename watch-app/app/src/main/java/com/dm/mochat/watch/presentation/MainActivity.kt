@@ -18,6 +18,8 @@ import com.dm.mochat.watch.presentation.views.login.LoginScreen
 import com.dm.mochat.watch.presentation.views.register.RegisterScreen
 import com.dm.mochat.watch.presentation.views.start.StartScreen
 import com.dm.mochat.watch.presentation.theme.MoChatWatchTheme
+import com.dm.mochat.watch.presentation.views.chat.ChatScreen
+import com.dm.mochat.watch.presentation.views.chat.RecipientScreen
 import com.dm.mochat.watch.presentation.views.contact.ContactsScreen
 import com.dm.mochat.watch.presentation.views.contact.IndividualGroupContactScreen
 import com.dm.mochat.watch.presentation.views.contact.AddEditIndividualScreen
@@ -66,6 +68,12 @@ fun WearApp() {
                 }
                 is Screen.ManageGroupMembersScreen -> {
                     ManageGroupMembersScreen()
+                }
+                is Screen.RecipientScreen -> {
+                    RecipientScreen()
+                }
+                is Screen.ChatScreen -> {
+                    ChatScreen()
                 }
             }
         }

@@ -13,6 +13,8 @@ sealed class Screen {
     object AddEditIndividualScreen: Screen()
     object AddEditGroupScreen: Screen()
     object ManageGroupMembersScreen: Screen()
+    object RecipientScreen: Screen()
+    object ChatScreen: Screen()
 }
 
 object AppRouter {

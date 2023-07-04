@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -17,14 +20,17 @@ import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.ScalingLazyColumn
 import androidx.wear.compose.material.TimeText
+import androidx.wear.compose.material.TitleCard
 import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
 import androidx.wear.compose.material.rememberScalingLazyListState
 import com.dm.mochat.watch.presentation.components.ButtonComponent
+import com.dm.mochat.watch.presentation.components.IconButtonComponent
 import com.dm.mochat.watch.presentation.components.LargeTextComponent
 import com.dm.mochat.watch.presentation.components.NormalTextComponent
+import com.dm.mochat.watch.presentation.navigation.AppRouter
+import com.dm.mochat.watch.presentation.navigation.Screen
 import com.dm.mochat.watch.presentation.theme.BlackPearl
-import com.dm.mochat.watch.presentation.theme.LightCyan
 import com.dm.mochat.watch.presentation.theme.LightSkyBlue
 
 @Composable
@@ -48,6 +54,14 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
             state = scalingLazyListState
         ) {
             item {
+                IconButtonComponent(
+                    iconVector = Icons.Filled.AddComment,
+                    description = "New Chat",
+                    onButtonClick = { AppRouter.navigateTo(Screen.RecipientScreen) }
+                )
+            }
+
+            item {
                 Column(
                     modifier = Modifier
                         .fillMaxSize(),
@@ -55,10 +69,21 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     LargeTextComponent(
-                        text = "Hello, ${homeViewModel.currentUserName.value}",
-                        color = LightCyan
+                        text = "Hello, ${homeViewModel.currentUserName.value}"
                     )
-                    NormalTextComponent(text = homeViewModel.currentUserEmail.value!!, color = LightCyan)
+                    NormalTextComponent(text = homeViewModel.currentUserEmail.value!!)
+                }
+            }
+
+            item {
+                TitleCard(
+                    onClick = {},
+                    title = {
+                        NormalTextComponent(text = "Alicia", alignment = TextAlign.Left)
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    LargeTextComponent(text = "Message", alignment = TextAlign.Left)
                 }
             }
 
