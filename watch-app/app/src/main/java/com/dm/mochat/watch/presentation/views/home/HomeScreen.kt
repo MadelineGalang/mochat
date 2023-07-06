@@ -8,9 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -19,10 +20,12 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.ScalingLazyColumn
+import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.material.TitleCard
 import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
+import androidx.wear.compose.material.items
 import androidx.wear.compose.material.rememberScalingLazyListState
 import com.dm.mochat.watch.presentation.components.ButtonComponent
 import com.dm.mochat.watch.presentation.components.IconButtonComponent
@@ -36,6 +39,11 @@ import com.dm.mochat.watch.presentation.theme.LightSkyBlue
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     homeViewModel.getCurrentUser()
+    homeViewModel.getMessages()
+
+    val messages: List<Map<String, Any>> by homeViewModel.messages.observeAsState(
+        initial = emptyList<Map<String, Any>>().toMutableList()
+    )
 
     val scalingLazyListState = rememberScalingLazyListState()
 
@@ -48,7 +56,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colors.background),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp),
+            contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             state = scalingLazyListState
@@ -75,15 +83,17 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
                 }
             }
 
-            item {
+            items(messages) {m ->
+                val sender = m["sent_by"].toString()
+                val message = m["message"].toString()
+                val date = m["sent_on"].toString()
+
                 TitleCard(
                     onClick = {},
-                    title = {
-                        NormalTextComponent(text = "Alicia", alignment = TextAlign.Left)
-                    },
-                    modifier = Modifier.fillMaxSize()
+                    title = { Text(sender) },
+                    time = { Text(date) },
                 ) {
-                    LargeTextComponent(text = "Message", alignment = TextAlign.Left)
+                    Text(message)
                 }
             }
 

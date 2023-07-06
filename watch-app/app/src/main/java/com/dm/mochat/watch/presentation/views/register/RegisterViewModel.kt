@@ -9,6 +9,7 @@ import com.dm.mochat.watch.presentation.navigation.Screen
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.auth.ktx.userProfileChangeRequest
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 class RegisterViewModel : ViewModel() {
@@ -84,18 +85,30 @@ class RegisterViewModel : ViewModel() {
                 if (it.isSuccessful) {
                     Log.d(TAG, "user name added")
 
-                    AppRouter.navigateTo(Screen.HomeScreen)
+                    addUserToDatabase()
                 }
-
-                _loading.value = false
             }
             .addOnFailureListener {
                 Log.d(TAG, "add user name failed")
                 Log.d(TAG, "Exception = ${it.message}")
                 Log.d(TAG, "Exception = ${it.localizedMessage}")
-
-                _loading.value = false
-                AppRouter.navigateTo(Screen.HomeScreen)
             }
+    }
+
+    private fun addUserToDatabase() {
+        val user = auth.currentUser
+
+        if (user != null) {
+            Firebase.firestore.collection("users").document().set(
+                hashMapOf(
+                    "uid" to user.uid,
+                    "email" to user.email,
+                    "name" to user.displayName
+                )
+            ).addOnSuccessListener {
+                AppRouter.navigateTo(Screen.HomeScreen)
+                _loading.value = false
+            }
+        }
     }
 }

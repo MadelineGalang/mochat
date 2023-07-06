@@ -95,9 +95,9 @@ fun IconButtonComponent(iconVector:ImageVector, description:String, onButtonClic
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TextFieldComponent(
-    placeholder:String,
+    placeholder: String,
     onTextChange: (String) -> Unit,
-    isPassword:Boolean = false,
+    isPassword: Boolean = false,
     icon: ImageVector? = null
 ) {
     val textValue = remember {
@@ -112,6 +112,72 @@ fun TextFieldComponent(
             onTextChange(it.text)
         },
         singleLine = true,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                keyboardController?.hide()
+            }
+        ),
+        textStyle = TextStyle(
+            fontSize = 14.sp,
+            color = LightCyan
+        ),
+        visualTransformation = if(isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        decorationBox = { innerTextField ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = 1.dp,
+                        color = LightCyan,
+                        shape = RoundedCornerShape(size = 30.dp)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+            ) {
+                Row {
+                    if (textValue.value.isEmpty()) {
+                        if (icon != null) {
+                            Icon(icon, contentDescription = null,tint=LightSkyBlue)
+                            Spacer(modifier = Modifier.width(5.dp))
+                        }
+                        Text(
+                            text = placeholder,
+                            fontSize = 14.sp,
+                            color = LightSkyBlue
+                        )
+                    }
+                    innerTextField()
+                }
+            }
+        }
+    )
+}
+
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun TextFieldWithValueComponent(
+    value: String,
+    placeholder: String,
+    onTextChange: (String) -> Unit,
+    isPassword: Boolean = false,
+    singleLine: Boolean = true,
+    icon: ImageVector? = null
+) {
+    val textValue = remember {
+        mutableStateOf("")
+    }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    BasicTextField(
+        value = TextFieldValue(value),
+        onValueChange = {
+            textValue.value = it.text
+            onTextChange(it.text)
+        },
+        singleLine = singleLine,
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Done
         ),
