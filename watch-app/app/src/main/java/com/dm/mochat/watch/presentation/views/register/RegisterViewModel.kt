@@ -107,6 +107,10 @@ class RegisterViewModel : ViewModel() {
                 )
             ).addOnSuccessListener {
                 AppRouter.navigateTo(Screen.HomeScreen)
+
+                _name.value = ""
+                _email.value = ""
+                _password.value = ""
                 _loading.value = false
             }
         }

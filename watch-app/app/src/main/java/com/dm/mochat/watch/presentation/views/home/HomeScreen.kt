@@ -12,9 +12,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.PositionIndicator
@@ -77,21 +79,21 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     LargeTextComponent(
-                        text = "Hello, ${homeViewModel.currentUserName.value}"
+                        text = "Logged in as ${homeViewModel.currentUserName.value}"
                     )
                     NormalTextComponent(text = homeViewModel.currentUserEmail.value!!)
                 }
             }
 
             items(messages) {m ->
-                val sender = m["sent_by"].toString()
+                val sender = (m["sent_by"] as? Map<*, *>)?.get("name")?.toString() ?: "Unknown"
                 val message = m["message"].toString()
                 val date = m["sent_on"].toString()
 
                 TitleCard(
                     onClick = {},
                     title = { Text(sender) },
-                    time = { Text(date) },
+                    time = { Text(text = date, style = TextStyle(fontSize = 10.sp)) },
                 ) {
                     Text(message)
                 }
@@ -99,7 +101,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
 
             item {
                 ButtonComponent(
-                    text = "LOGOUT",
+                    text = "LOG OUT",
                     onButtonClick = {
                         homeViewModel.logout()
                     },

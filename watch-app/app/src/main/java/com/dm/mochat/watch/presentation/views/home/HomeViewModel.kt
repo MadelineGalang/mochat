@@ -39,48 +39,30 @@ class HomeViewModel : ViewModel() {
         }
     }
 
+    @SuppressLint("SimpleDateFormat")
     fun getMessages() {
-        val dateFormat = SimpleDateFormat("MM/dd/yy")
+        val dateFormat = SimpleDateFormat("M/d/yy H:mm a")
 
         Firebase.firestore.collection("messages")
             .whereEqualTo("sent_to", _currentUserEmail.value)
             .orderBy("sent_on")
             .addSnapshotListener { value, _ ->
+                Log.d(TAG, "value: ${value?.documents}")
                 val list = emptyList<Map<String, Any>>().toMutableList()
 
                 if (value != null) {
                     for (doc in value) {
                         val data = doc.data
+                        Log.d(TAG, "data: ${data}")
 
                         val stringDate = dateFormat.format(Date(data["sent_on"] as Long))
                         data["sent_on"] = stringDate
 
-                        getUserNameByEmail(data["sent_by"] as String) { name ->
-                            data["sent_by"] = name
-
-                            list.add(data)
-
-                            if (list.size == value.size()) {
-                                updateMessages(list)
-                            }
-                        }
+                        list.add(data)
                     }
-                } else {
-                    updateMessages(list)
                 }
-            }
-    }
 
-    private fun getUserNameByEmail(email: String, callback: (String?) -> Unit) {
-        Firebase.firestore.collection("users")
-            .whereEqualTo("email", email)
-            .get()
-            .addOnSuccessListener { value ->
-                if (!value.isEmpty) {
-                    callback(value.documents[0].getString("name"))
-                } else {
-                    callback("Unknown")
-                }
+                updateMessages(list)
             }
     }
 

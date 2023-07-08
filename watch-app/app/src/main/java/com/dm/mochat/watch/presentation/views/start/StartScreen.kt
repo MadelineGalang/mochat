@@ -37,7 +37,7 @@ fun StartScreen() {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ButtonComponent(
-                text = "LOGIN",
+                text = "LOG IN",
                 onButtonClick = { AppRouter.navigateTo(Screen.LoginScreen) },
                 textColor = BlackPearl,
                 buttonColor = LightSkyBlue

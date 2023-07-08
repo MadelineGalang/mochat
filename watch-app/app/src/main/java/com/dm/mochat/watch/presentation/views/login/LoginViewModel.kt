@@ -53,6 +53,8 @@ class LoginViewModel : ViewModel() {
                         AppRouter.navigateTo(Screen.HomeScreen)
                     }
 
+                    _email.value = ""
+                    _password.value = ""
                     _loading.value = false
                 }
                 .addOnFailureListener {

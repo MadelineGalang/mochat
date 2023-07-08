@@ -34,7 +34,7 @@ import com.dm.mochat.watch.presentation.theme.LightCyan
 import com.dm.mochat.watch.presentation.theme.LightSkyBlue
 
 @Composable
-fun NormalTextComponent(text: String, color: Color = LightCyan, alignment: TextAlign = TextAlign.Center) {
+fun NormalTextComponent(text: String, color: Color = LightCyan, bold: Boolean = false, alignment: TextAlign = TextAlign.Center) {
     Text(
         text = text,
         modifier = Modifier
@@ -42,7 +42,7 @@ fun NormalTextComponent(text: String, color: Color = LightCyan, alignment: TextA
             .heightIn(min = 14.dp),
         style = TextStyle(
             fontSize = 14.sp,
-            fontWeight = FontWeight.Normal,
+            fontWeight = if(bold) FontWeight.Bold else FontWeight.Normal,
             fontStyle = FontStyle.Normal
         ),
         color = color,
@@ -75,7 +75,7 @@ fun ButtonComponent(text:String, onButtonClick: () -> Unit, textColor:Color, but
             .fillMaxWidth().height(48.dp),
         colors = ButtonDefaults.buttonColors(buttonColor)
     ) {
-        LargeTextComponent(text = text, color = textColor, bold = true)
+        NormalTextComponent(text = text, color = textColor, bold = true)
     }
 }
 
@@ -166,15 +166,11 @@ fun TextFieldWithValueComponent(
     singleLine: Boolean = true,
     icon: ImageVector? = null
 ) {
-    val textValue = remember {
-        mutableStateOf("")
-    }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     BasicTextField(
         value = TextFieldValue(value),
         onValueChange = {
-            textValue.value = it.text
             onTextChange(it.text)
         },
         singleLine = singleLine,
@@ -203,7 +199,7 @@ fun TextFieldWithValueComponent(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
             ) {
                 Row {
-                    if (textValue.value.isEmpty()) {
+                    if (value.isEmpty()) {
                         if (icon != null) {
                             Icon(icon, contentDescription = null,tint=LightSkyBlue)
                             Spacer(modifier = Modifier.width(5.dp))
