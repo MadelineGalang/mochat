@@ -1,13 +1,10 @@
-package com.dm.mochat.watch.presentation.views.login
+package com.dm.mochat.watch.presentation.views.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -17,7 +14,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.wear.compose.material.CircularProgressIndicator
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.PositionIndicator
 import androidx.wear.compose.material.Scaffold
@@ -26,27 +22,30 @@ import androidx.wear.compose.material.SwipeToDismissBox
 import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
+import androidx.wear.compose.material.items
 import androidx.wear.compose.material.rememberScalingLazyListState
 import androidx.wear.compose.material.rememberSwipeToDismissBoxState
+import com.dm.mochat.watch.presentation.components.ChipComponent
 import com.dm.mochat.watch.presentation.components.LargeTextComponent
-import com.dm.mochat.watch.presentation.components.IconButtonComponent
-import com.dm.mochat.watch.presentation.components.TextFieldWithValueComponent
 import com.dm.mochat.watch.presentation.navigation.AppRouter
 import com.dm.mochat.watch.presentation.navigation.Screen
 import com.dm.mochat.watch.presentation.navigation.SystemBackButtonHandler
-import com.dm.mochat.watch.presentation.theme.LightSkyBlue
+import com.dm.mochat.watch.presentation.theme.LightPowderBlue
+import com.dm.mochat.watch.presentation.theme.NavyBlue
 
 @Composable
-fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
-    val email: String by loginViewModel.email.observeAsState(initial = "")
-    val password: String by loginViewModel.password.observeAsState(initial = "")
-    val loading: Boolean by loginViewModel.loading.observeAsState(initial = false)
+fun RecipientScreen(chatViewModel: ChatViewModel = viewModel()) {
+    chatViewModel.getRecipients()
+
+    val recipients: List<Map<String, Any>> by chatViewModel.recipients.observeAsState(
+        initial = emptyList<Map<String, Any>>().toMutableList()
+    )
 
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
     val scalingLazyListState = rememberScalingLazyListState()
 
     SwipeToDismissBox(
-        onDismissed = { AppRouter.navigateTo(Screen.StartScreen) },
+        onDismissed = { AppRouter.navigateTo(Screen.HomeScreen) },
         state = swipeToDismissBoxState
     ) { isBackground ->
         if (isBackground) {
@@ -61,51 +60,35 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colors.background),
-                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp),
+                    contentPadding = PaddingValues(
+                        start = 20.dp,
+                        end = 20.dp,
+                        top = 20.dp,
+                        bottom = 20.dp
+                    ),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     state = scalingLazyListState
                 ) {
-                    item { LargeTextComponent(text = "Log in") }
-
                     item {
-                        TextFieldWithValueComponent(
-                            value = email,
-                            placeholder = "Email",
-                            onTextChange = {
-                                loginViewModel.updateEmail(it)
-                            }
+                        LargeTextComponent(
+                            text = "Select Recipient",
+                            bold = true
                         )
                     }
 
-                    item {
-                        TextFieldWithValueComponent(
-                            value = password,
-                            placeholder = "Password",
-                            onTextChange = {
-                                loginViewModel.updatePassword(it)
+                    items(recipients) { r ->
+                        val name = r["name"].toString()
+                        val email = r["email"].toString()
+
+                        ChipComponent(
+                            text = name,
+                            onChipClick = {
+                                chatViewModel.selectRecipient(email, name)
+                                AppRouter.navigateTo(Screen.ChatScreen)
                             },
-                            isPassword = true
-                        )
-                    }
-
-                    item {
-                        IconButtonComponent(
-                            iconVector = Icons.Filled.Check,
-                            description = "Login",
-                            onButtonClick = {
-                                loginViewModel.login()
-                            },
-                        )
-                    }
-                }
-
-                if (loading) {
-                    Box(modifier = Modifier.fillMaxSize()) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(size = 40.dp).align(Alignment.Center),
-                            indicatorColor = LightSkyBlue,
-                            strokeWidth = 4.dp
+                            textColor = LightPowderBlue,
+                            chipColor = NavyBlue
                         )
                     }
                 }
@@ -114,12 +97,12 @@ fun LoginScreen(loginViewModel: LoginViewModel = viewModel()) {
     }
 
     SystemBackButtonHandler {
-        AppRouter.navigateTo(Screen.StartScreen)
+        AppRouter.navigateTo(Screen.HomeScreen)
     }
 }
 
 @Preview(device = Devices.WEAR_OS_LARGE_ROUND, showSystemUi = true)
 @Composable
-fun LoginScreenPreview() {
-    LoginScreen()
+fun RecipientScreenPreview() {
+    RecipientScreen()
 }
