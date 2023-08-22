@@ -11,6 +11,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.dm.mochat.watch.core.Gesture
+import com.dm.mochat.watch.helper.Vibration
 
 @Composable
 fun GestureNavigableView(
@@ -24,11 +25,11 @@ fun GestureNavigableView(
             sensorManager,
             onDelimiterDetected = {
                 Log.d("Gesture Navigation", "Detected delimiter")
-                vibrator.vibrate(VibrationEffect.createOneShot(150, 200))
+                vibrator.vibrate(Vibration.startGestureVibration)
             },
             onNavigationGestureDetected = { gesture, viewModel ->
                 Log.d("Gesture Navigation", "Detected Navigation Gesture")
-                vibrator.vibrate(VibrationEffect.createOneShot(150, 200))
+                vibrator.vibrate(Vibration.endGestureVibration)
                 onGestureDetected(gesture, viewModel)
             })
         GestureNavigableViewModel.startGestureDetection()

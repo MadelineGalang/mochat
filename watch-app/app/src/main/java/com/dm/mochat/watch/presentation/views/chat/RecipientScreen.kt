@@ -93,7 +93,7 @@ fun RecipientScreen(chatViewModel: ChatViewModel = viewModel()) {
 
                 Gesture.Down -> {
                     // back to conversations
-                    tts.speak("Navigating to home", TextToSpeech.QUEUE_FLUSH, null, null)
+                    tts.speak("Viewing conversations", TextToSpeech.QUEUE_FLUSH, null, null)
                     AppRouter.navigateTo(Screen.HomeScreen)
                     Log.d("Gesture Navigation", "back to conversations")
                 }

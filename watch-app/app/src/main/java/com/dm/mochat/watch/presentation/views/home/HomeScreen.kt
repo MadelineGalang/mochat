@@ -226,7 +226,12 @@ private fun ttsCurrentMessage(
     messages: List<Map<String, Any>>,
     tts: TextToSpeech,
 ) {
-    val currentMessage = messages[currentIndex - itemCountBeforeList + 1]
+    val currentIndex = currentIndex - itemCountBeforeList + 1
+    if(currentIndex < 0 || currentIndex >= messages.size){
+        return
+    }
+
+    val currentMessage = messages[currentIndex]
     val sender = (currentMessage["sent_by"] as? Map<*, *>)?.get("name")?.toString() ?: "Unknown"
     val message = currentMessage["message"].toString()
     val date = currentMessage["sent_on"].toString()

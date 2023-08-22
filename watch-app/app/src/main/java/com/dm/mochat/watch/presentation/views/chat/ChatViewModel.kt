@@ -99,12 +99,12 @@ class ChatViewModel : ViewModel() {
 
     fun getMessageFromGesture(gesture: Gesture):String {
         return when(gesture){
-            Gesture.Left -> "Left"
-            Gesture.Right -> "Right"
-            Gesture.Up -> "Up"
-            Gesture.Down -> "Down"
-            Gesture.CircleIn -> "CircleIn"
-            Gesture.CircleOut -> "CircleOut"
+            Gesture.Left -> "Goodbye"
+            Gesture.Right -> "Hello"
+            Gesture.Up -> "Yes"
+            Gesture.Down -> "No"
+            Gesture.CircleIn -> "I don't quite understand"
+            Gesture.CircleOut -> "Please continue"
             else -> throw IllegalArgumentException("unknown gesture")
         }
     }

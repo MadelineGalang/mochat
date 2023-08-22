@@ -14,7 +14,7 @@ object GestureNavigableViewModel {
     private var onNavigationGestureDetected: (gesture: Gesture, viewModel: GestureNavigableViewModel) -> Unit =
         { _, _ -> }
     private var delimiterGestureDetector: DelimiterGestureDetector? = null
-    private var navigationGestureDataDetector: GestureDataCollector? = null
+    private var navigationGestureDataCollector: GestureDataCollector? = null
     private var navigationGestureDataPredictor = ApiNavigationGestureDetector()
     private val timerDuration = 1600L
 
@@ -29,7 +29,7 @@ object GestureNavigableViewModel {
         this.onNavigationGestureDetected = onNavigationGestureDetected
         this.delimiterGestureDetector =
             DelimiterGestureDetector(sensorManager, ::_onDelimiterDetected)
-        this.navigationGestureDataDetector = GestureDataCollector(sensorManager)
+        this.navigationGestureDataCollector = GestureDataCollector(sensorManager)
     }
 
 
@@ -57,28 +57,31 @@ object GestureNavigableViewModel {
             ); return
         }
         delimiterGestureDetector!!.stop()
-        navigationGestureDataDetector!!.stop()
+        navigationGestureDataCollector!!.stop()
         started = false
     }
 
     private fun _onDelimiterDetected(context: DelimiterGestureDetector) {
         onDelimiterDetected()
         delimiterGestureDetector!!.stop()
-        navigationGestureDataDetector!!.start()
+        navigationGestureDataCollector!!.start()
         val countDownTimer = object : CountDownTimer(timerDuration, 10) {
             override fun onTick(millisRemaining: Long) {
             }
             override fun onFinish() {
-                val gestureData = navigationGestureDataDetector!!.getGestureData()
-                navigationGestureDataPredictor!!.predictGesture(gestureData) {
+                navigationGestureDataCollector!!.stop()
+                val gestureData = navigationGestureDataCollector!!.getGestureData()
+                navigationGestureDataCollector!!.reset()
+                navigationGestureDataPredictor.predictGesture(gestureData) {
                     _onNavigationGestureDetected(it);
                 }
             }
         }.start()
+
     }
 
     private fun _onNavigationGestureDetected(gesture: Gesture) {
-        navigationGestureDataDetector!!.stop()
+        navigationGestureDataCollector!!.stop()
         delimiterGestureDetector!!.start()
         onNavigationGestureDetected(gesture, this)
     }

@@ -60,20 +60,23 @@ class GestureDataCollector(private val sensorManager: SensorManager) {
     }
 
     fun stop(){
-        // reset data points
-        _linearDataPoints.forEachIndexed { index, _ -> _linearDataPoints[index] = ImuSensorDatapoint(0L, 0f, 0f, 0f) }
-        _gyroscopeDataPoints.forEachIndexed { index, _ -> _gyroscopeDataPoints[index] = ImuSensorDatapoint(0L, 0f, 0f, 0f) }
-        _accelerometerDataPoints.forEachIndexed { index, _ -> _accelerometerDataPoints[index] = ImuSensorDatapoint(0L, 0f, 0f, 0f) }
         sensorManager.unregisterListener(accelerometerListener)
         sensorManager.unregisterListener(linearListener)
         sensorManager.unregisterListener(gyroscopeListener)
     }
 
+
+    fun reset(){
+        _linearDataPoints.forEachIndexed { index, _ -> _linearDataPoints[index] = ImuSensorDatapoint(0L, 0f, 0f, 0f) }
+        _gyroscopeDataPoints.forEachIndexed { index, _ -> _gyroscopeDataPoints[index] = ImuSensorDatapoint(0L, 0f, 0f, 0f) }
+        _accelerometerDataPoints.forEachIndexed { index, _ -> _accelerometerDataPoints[index] = ImuSensorDatapoint(0L, 0f, 0f, 0f) }
+    }
+
     fun getGestureData(): GestureData{
         return GestureData(
-            _accelerometerDataPoints,
-            _gyroscopeDataPoints,
-            _linearDataPoints
+            _accelerometerDataPoints.copyOf(),
+            _gyroscopeDataPoints.copyOf(),
+            _linearDataPoints.copyOf()
         )
     }
 

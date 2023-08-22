@@ -52,6 +52,7 @@ def predict():
     linear_data = get_data_from_string(data["linear"])
     merged_data = merge_sensors(acc_data, gyro_data, linear_data)
     preprocessed_data = preprocess_X([merged_data])
+    print(preprocessed_data)
 
     # predict
     model = pickle.load(open("saved_models/conv_20230814162348.sav", "rb"))

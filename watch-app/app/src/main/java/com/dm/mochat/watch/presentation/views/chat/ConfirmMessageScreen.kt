@@ -42,6 +42,7 @@ import com.dm.mochat.watch.core.Gesture
 import com.dm.mochat.watch.core.GestureDataCollector
 import com.dm.mochat.watch.helper.TextToSpeechFactory
 import com.dm.mochat.watch.helper.TtsHelper.speakThenDo
+import com.dm.mochat.watch.helper.Vibration
 import com.dm.mochat.watch.presentation.navigation.AppRouter
 import com.dm.mochat.watch.presentation.navigation.Screen
 import java.util.Locale
@@ -62,7 +63,7 @@ fun ConfirmMessageScreen(chatViewModel: ChatViewModel = viewModel()) {
         it.stop()
         countDownTimer.cancel()
         chatViewModel.sendMessage()
-        vibrator.vibrate(VibrationEffect.createOneShot(150, 200))
+        vibrator.vibrate(Vibration.endGestureVibration)
         val text = "Message sent"
         tts.speakThenDo(text, TextToSpeech.QUEUE_FLUSH, null, "Send message"){
             AppRouter.navigateTo(Screen.HomeScreen)
@@ -85,11 +86,12 @@ fun ConfirmMessageScreen(chatViewModel: ChatViewModel = viewModel()) {
 
 
     LaunchedEffect(null) {
-        delimiterGestureDetector.start()
-        vibrator.vibrate(VibrationEffect.createOneShot(150, 200))
-
-        val text = "Do you want to say \"${chatViewModel.message.value}\" to ${chatViewModel.recipient.value}?"
+        var message = Screen.Data.map["message"]!!
+        chatViewModel.updateMessage(message)
+        val text = "Do you want to say \"${message}\" to ${chatViewModel.recipient.value}?"
         tts.speakThenDo(text, TextToSpeech.QUEUE_FLUSH, null, "Send message"){
+            vibrator.vibrate(Vibration.startGestureVibration)
+            delimiterGestureDetector.start()
             countDownTimer.start()
         }
     }
