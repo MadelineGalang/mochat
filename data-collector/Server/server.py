@@ -37,6 +37,14 @@ def post_data():
 
 @app.route('/prediction', methods=["POST"])
 def predict():
+    return (
+        # "left"
+        # "right"
+        # "up"
+        # "down"
+        # "circle_in"
+        "circle_out"
+    )
     data = request.json
     # load data
     acc_data = get_data_from_string(data["acc"])
@@ -46,8 +54,9 @@ def predict():
     preprocessed_data = preprocess_X([merged_data])
 
     # predict
-    model = pickle.load(open("saved_models/gesture_detector.sav", "rb"))
+    model = pickle.load(open("saved_models/conv_20230814162348.sav", "rb"))
     prediction = model.predict(preprocessed_data)
     labels = to_label(prediction)
-    print(labels)
+    print(labels[0])
     return labels[0]
+    

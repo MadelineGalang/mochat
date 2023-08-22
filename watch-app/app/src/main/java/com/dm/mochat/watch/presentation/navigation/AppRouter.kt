@@ -15,12 +15,20 @@ sealed class Screen {
     object ManageGroupMembersScreen: Screen()
     object RecipientScreen: Screen()
     object ChatScreen: Screen()
+    object MessageGestureScreen: Screen()
+    object ConfirmMessageScreen: Screen()
+
+    object Data{
+        var map = mapOf<String, String>()
+    }
+
 }
 
 object AppRouter {
     var currentScreen: MutableState<Screen> = mutableStateOf(Screen.StartScreen)
 
-    fun navigateTo(destination:Screen){
+    fun navigateTo(destination:Screen, data: Map<String, String> = mapOf()){
         currentScreen.value = destination
+        Screen.Data.map = data
     }
 }

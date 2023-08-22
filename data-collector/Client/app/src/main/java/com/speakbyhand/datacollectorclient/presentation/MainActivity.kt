@@ -7,13 +7,17 @@
 package com.speakbyhand.datacollectorclient.presentation
 
 import android.content.Context
+import android.content.Context.SENSOR_SERVICE
 import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.speech.tts.TextToSpeech
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -27,19 +31,21 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.InlineSlider
@@ -50,6 +56,7 @@ import androidx.wear.compose.material.rememberPickerState
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import com.speakbyhand.datacollectorclient.core.DelimiterGestureDetector
 import com.speakbyhand.datacollectorclient.core.GestureDataApiService
 import com.speakbyhand.datacollectorclient.core.GestureDataRecorder
 import com.speakbyhand.datacollectorclient.core.GestureSlider
@@ -64,7 +71,6 @@ class MainActivity : ComponentActivity() {
     lateinit var linearDataRecorder: GestureDataRecorder
     lateinit var gestureSlider: GestureSlider
     lateinit var vibrator: Vibrator
-
 
 
     lateinit var tts: TextToSpeech
@@ -84,8 +90,8 @@ class MainActivity : ComponentActivity() {
             sensorManager,
             Sensor.TYPE_LINEAR_ACCELERATION,
             onNext = { },
-            onPrevious = {  },
-            onUpdate = {  },
+            onPrevious = { },
+            onUpdate = { },
             sensitivity = 10f
         )
 
@@ -119,7 +125,12 @@ class MainActivity : ComponentActivity() {
         val mergedGyroData: String = gyroDataRecorder.getDataAsCsvString()
         val mergedLinearData: String = linearDataRecorder.getDataAsCsvString()
 
-        apiService.postGestureDataRecording(gestureName, mergedAccelData, mergedGyroData, mergedLinearData)
+        apiService.postGestureDataRecording(
+            gestureName,
+            mergedAccelData,
+            mergedGyroData,
+            mergedLinearData
+        )
         gyroDataRecorder.reset()
         accelDataRecorder.reset()
         linearDataRecorder.reset()
@@ -141,7 +152,12 @@ class MainActivity : ComponentActivity() {
         val mergedGyroData: String = gyroDataRecorder.dataAsCsvString
         val mergedLinearData: String = linearDataRecorder.dataAsCsvString
 
-        apiService.getGestureDataPrediction(mergedAccelData, mergedGyroData, mergedLinearData, callback)
+        apiService.getGestureDataPrediction(
+            mergedAccelData,
+            mergedGyroData,
+            mergedLinearData,
+            callback
+        )
         gyroDataRecorder.reset()
         accelDataRecorder.reset()
         linearDataRecorder.reset()
@@ -165,9 +181,9 @@ fun WearApp(
     onRecordStart: (String) -> Unit,
     onRecordStop: (String) -> Unit,
     onTestStart: () -> Unit,
-    onTestStop: ((String)-> Unit) -> Unit,
+    onTestStop: ((String) -> Unit) -> Unit,
     gestureSlider: GestureSlider,
-vibrator: Vibrator
+    vibrator: Vibrator
 ) {
     var recordTimeMilliseconds: Long = 1600
     DataCollectorClientTheme {
@@ -177,25 +193,30 @@ vibrator: Vibrator
             navController = navController,
             startDestination = "selectAction"
         ) {
-            composable("selectAction"){
+            composable("selectAction") {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Button(onClick = {
                         navController.navigate("selectGesture")
-                    }){
+                    }) {
                         Text("Capture")
                     }
                     Button(onClick = {
                         navController.navigate("testingView")
-                    }){
+                    }) {
                         Text("Test")
                     }
                     Button(onClick = {
                         navController.navigate("slider")
-                    }){
+                    }) {
                         Text("Slider")
+                    }
+                    Button(onClick = {
+                        navController.navigate("sensorTest")
+                    }) {
+                        Text("sensorTest")
                     }
                 }
             }
@@ -209,10 +230,19 @@ vibrator: Vibrator
             }
             composable("record/{gestureName}") {
                 val gestureName = it.arguments?.getString("gestureName")!!
-                recordingView(vibrator, gestureName, onRecordStart, onRecordStop, recordTimeMilliseconds)
+                recordingView(
+                    vibrator,
+                    gestureName,
+                    onRecordStart,
+                    onRecordStop,
+                    recordTimeMilliseconds
+                )
             }
             composable("slider") {
                 gestureSliderView(gestureSlider)
+            }
+            composable("sensorTest") {
+                sensorTestView()
             }
         }
     }
@@ -220,7 +250,17 @@ vibrator: Vibrator
 
 @Composable
 private fun selectGesture(onGestureSelected: (String) -> Unit) {
-    val items = listOf("test", "up", "down", "left", "right", "circle_in", "circle_out", "delimiter", "nondelimiter")
+    val items = listOf(
+        "test",
+        "up",
+        "down",
+        "left",
+        "right",
+        "circle_in",
+        "circle_out",
+        "delimiter",
+        "nondelimiter"
+    )
     val state = rememberPickerState(items.size)
     val contentDescription by remember { derivedStateOf { "${state.selectedOption + 1}" } }
     Column(
@@ -271,7 +311,6 @@ private fun recordingView(
     var nums: Long by remember { mutableStateOf(3) }
     var setView: String by remember { mutableStateOf("Click to Start...") }
 
-
     val timer = object : CountDownTimer(recordTimeMilliseconds, 10) {
         override fun onTick(millisUntilFinished: Long) {
             setView = "$nums"
@@ -279,12 +318,31 @@ private fun recordingView(
         }
 
         override fun onFinish() {
-            setView = "Click to Start..."
-            onStop(gestureName)
-            currentState.value = IDLE_STATE
-            count.value += 1
-            vibrator.vibrate(VibrationEffect.createOneShot(150, 200))
+            if (!DelimiterGestureDetector.started) {
+                setView = "Click to Start..."
+                currentState.value = IDLE_STATE
+                vibrator.vibrate(VibrationEffect.createOneShot(150, 200))
+                onStop(gestureName)
+                DelimiterGestureDetector.start()
+                count.value += 1
+            }
         }
+    }
+
+    val sensorManager =
+        LocalContext.current.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    DelimiterGestureDetector.configure(sensorManager) {
+        if (DelimiterGestureDetector.started) {
+            DelimiterGestureDetector.started = false;
+            vibrator.vibrate(VibrationEffect.createOneShot(150, 200))
+            DelimiterGestureDetector.stop()
+            onStart(gestureName)
+            timer.start()
+            currentState.value = RECORDING_STATE
+        }
+    }
+    if (!DelimiterGestureDetector.started) {
+        DelimiterGestureDetector.start()
     }
 
     Column(
@@ -322,7 +380,7 @@ private fun recordingView(
 @Composable
 private fun testingView(
     onStart: () -> Unit,
-    onStop: ((String)->Unit) -> Unit,
+    onStop: ((String) -> Unit) -> Unit,
     recordTimeMilliseconds: Long
 ) {
     val IDLE_STATE = "IDLE"
@@ -331,7 +389,6 @@ private fun testingView(
     val currentState = remember { mutableStateOf(IDLE_STATE) }
     var nums: Long by remember { mutableStateOf(3) }
     var setView: String by remember { mutableStateOf("Click to Start...") }
-
     val timer = object : CountDownTimer(recordTimeMilliseconds, 10) {
         override fun onTick(millisUntilFinished: Long) {
             setView = "$nums"
@@ -340,12 +397,14 @@ private fun testingView(
 
         override fun onFinish() {
             setView = "Click to Start..."
-             onStop{ detectedValue: String ->
-                 detectedGesture.value = detectedValue
-             }
+            onStop { detectedValue: String ->
+                detectedGesture.value = detectedValue
+            }
             currentState.value = IDLE_STATE
         }
     }
+
+
 
     Column(
         modifier = Modifier
@@ -397,7 +456,7 @@ private fun gestureSliderView(gestureSlider: GestureSlider) {
         index = gestureSlider.currentIndex
     }
 
-    Column(Modifier, Arrangement.Center, Alignment.CenterHorizontally){
+    Column(Modifier, Arrangement.Center, Alignment.CenterHorizontally) {
         Text(text = "Sensitivity: $value")
         Text(text = "Index: $index")
         Text(text = "Distance: $distance")
@@ -412,17 +471,84 @@ private fun gestureSliderView(gestureSlider: GestureSlider) {
             segmented = false
         )
         Button(onClick = {
-            if(isStarted){
+            if (isStarted) {
                 gestureSlider.stop()
                 isStarted = false
-            }else{
+            } else {
                 gestureSlider.start()
                 isStarted = true
             }
         }) {
-            Text(text = if(isStarted) "Stop" else "Start")
+            Text(text = if (isStarted) "Stop" else "Start")
         }
     }
+}
+
+
+@Composable
+private fun sensorTestView() {
+    val sensorManager = LocalContext.current.getSystemService(SENSOR_SERVICE) as SensorManager
+    val sensorDelay = SensorManager.SENSOR_DELAY_NORMAL
+
+    val accReading = remember { mutableStateListOf(0.0f, 0.0f, 0.0f) }
+    val accSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    val accListener = object : SensorEventListener {
+        override fun onSensorChanged(sensorEvent: SensorEvent) {
+            accReading[0] = sensorEvent.values[0]
+            accReading[1] = sensorEvent.values[1]
+            accReading[2] = sensorEvent.values[2]
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor, i: Int) {}
+    }
+
+    val gyroReading = remember { mutableStateListOf(0.0f, 0.0f, 0.0f) }
+    val gyroSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+    val gyroListener = object : SensorEventListener {
+        override fun onSensorChanged(sensorEvent: SensorEvent) {
+            gyroReading[0] = sensorEvent.values[0]
+            gyroReading[1] = sensorEvent.values[1]
+            gyroReading[2] = sensorEvent.values[2]
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor, i: Int) {}
+    }
+
+    val linearReading = remember { mutableStateListOf(0.0f, 0.0f, 0.0f) }
+    val linearSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
+    val linearListener = object : SensorEventListener {
+        override fun onSensorChanged(sensorEvent: SensorEvent) {
+            linearReading[0] = sensorEvent.values[0]
+            linearReading[1] = sensorEvent.values[1]
+            linearReading[2] = sensorEvent.values[2]
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor, i: Int) {}
+    }
+
+
+    LaunchedEffect(Unit){
+        sensorManager.registerListener(linearListener, linearSensor, sensorDelay)
+        sensorManager.registerListener(gyroListener, gyroSensor, sensorDelay)
+        sensorManager.registerListener(accListener, accSensor, sensorDelay)
+        Log.i("TEST_VIEW", "---Initialized listeners---")
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            sensorManager.unregisterListener(accListener)
+            sensorManager.unregisterListener(gyroListener)
+            sensorManager.unregisterListener(linearListener)
+            Log.i("TEST_VIEW", "---Disposed listeners---")
+        }
+    }
+
+    Column(Modifier, Arrangement.Center, Alignment.CenterHorizontally) {
+        Text(text = "Gyroscope: %.2f, %.2f, %.2f".format(gyroReading[0], gyroReading[1], gyroReading[2]))
+        Text(text = "Accelerometer: %.2f, %.2f, %.2f".format(accReading[0], accReading[1], accReading[2]))
+        Text(text = "Linear: %.2f, %.2f, %.2f".format(linearReading[0], linearReading[1], linearReading[2]))
+    }
+
 }
 
 @Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)

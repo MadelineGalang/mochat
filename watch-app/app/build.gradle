@@ -71,6 +71,8 @@ dependencies {
     implementation "com.google.firebase:firebase-auth-ktx"
     implementation "com.google.firebase:firebase-firestore-ktx"
 
+    implementation 'com.squareup.okhttp3:okhttp:5.0.0-alpha.10'
+
 }
 
 configurations.implementation {

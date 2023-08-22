@@ -18,7 +18,7 @@ class GestureDataApiService {
     // for API
     private val client = OkHttpClient()
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType();
-    private val host = "http://192.168.1.4:5000"
+    private val host = "http://192.168.1.10:5000"
 
     fun postGestureDataRecording(
         gestureName: String,

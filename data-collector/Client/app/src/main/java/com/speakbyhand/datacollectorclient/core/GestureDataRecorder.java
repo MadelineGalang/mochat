@@ -47,7 +47,7 @@ public class GestureDataRecorder {
     }
 
     private long getTimeMilliseconds() {
-        long currMilli = System.currentTimeMillis();
+        long currMilli = System.nanoTime();
         return currMilli - startMilli;
     }
 

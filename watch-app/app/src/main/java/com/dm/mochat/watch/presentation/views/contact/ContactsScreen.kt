@@ -1,5 +1,6 @@
 package com.dm.mochat.watch.presentation.views.contact
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -13,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.*
+import com.dm.mochat.watch.core.Gesture
 import com.dm.mochat.watch.presentation.components.*
 import com.dm.mochat.watch.presentation.navigation.AppRouter
 import com.dm.mochat.watch.presentation.navigation.Screen
@@ -24,34 +26,74 @@ import com.dm.mochat.watch.presentation.theme.LightSkyBlue
 
 @Composable
 fun ContactsScreen(contactViewModel: ContactsViewModel = viewModel()) {
-    Scaffold(
-        timeText = { TimeText() }
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.background)
-                .padding(20.dp),
+    GestureNavigableView(
+        onGestureDetected = { gesture, viewModel ->
+            when (gesture) {
+                Gesture.Left -> {
+                    // previous message
+                    Log.d("Gesture Navigation", "Previous message")
+                }
+
+                Gesture.Right -> {
+                    // next message
+                    Log.d("Gesture Navigation", "Next message")
+                }
+
+                Gesture.Up -> {
+
+                }
+
+                Gesture.Down -> {
+                    // back to conversations
+                    Log.d("Gesture Navigation", "back to conversations")
+                }
+
+                Gesture.CircleIn -> {
+                    // repeat current message
+                    Log.d("Gesture Navigation", "repeat current message")
+                }
+
+                Gesture.CircleOut -> {
+                    // send gesture message
+                    Log.d("Gesture Navigation", "CircleOut")
+                }
+
+                Gesture.Unknown -> {
+                    // Unknown
+                    Log.d("Gesture Navigation", "Unknown")
+                }
+            }
+        }) {
+        Scaffold(
+            timeText = { TimeText() }
         ) {
-            IconButtonComponent(
-                iconVector = Icons.Filled.Person,
-                description = "Individual",
-                onButtonClick = { contactViewModel.navigateContacts(true) },
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-            IconButtonComponent(
-                iconVector = Icons.Filled.Groups,
-                description = "Group",
-                onButtonClick = { contactViewModel.navigateContacts(false) },
-                primaryColor = false
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colors.background)
+                    .padding(20.dp),
+            ) {
+                IconButtonComponent(
+                    iconVector = Icons.Filled.Person,
+                    description = "Individual",
+                    onButtonClick = { contactViewModel.navigateContacts(true) },
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                IconButtonComponent(
+                    iconVector = Icons.Filled.Groups,
+                    description = "Group",
+                    onButtonClick = { contactViewModel.navigateContacts(false) },
+                    primaryColor = false
+                )
+            }
+        }
+        SystemBackButtonHandler {
+            AppRouter.navigateTo(Screen.HomeScreen)
         }
     }
-    SystemBackButtonHandler {
-        AppRouter.navigateTo(Screen.HomeScreen)
-    }
+
 }
 
 @Composable
@@ -107,10 +149,11 @@ fun IndividualGroupContactScreen(contactViewModel: ContactsViewModel = viewModel
     SystemBackButtonHandler {
         AppRouter.navigateTo(Screen.ContactsScreen)
     }
+
 }
 
 @Composable
-fun AddEditIndividualScreen( contactViewModel: ContactsViewModel = viewModel()) {
+fun AddEditIndividualScreen(contactViewModel: ContactsViewModel = viewModel()) {
     val scalingLazyListState = rememberScalingLazyListState()
     Scaffold(
         timeText = { TimeText() },
@@ -187,7 +230,7 @@ fun AddEditIndividualScreen( contactViewModel: ContactsViewModel = viewModel()) 
 }
 
 @Composable
-fun AddEditGroupScreen( contactViewModel: ContactsViewModel = viewModel()) {
+fun AddEditGroupScreen(contactViewModel: ContactsViewModel = viewModel()) {
     val scalingLazyListState = rememberScalingLazyListState()
 
     Scaffold(
@@ -288,7 +331,7 @@ fun AddEditGroupScreen( contactViewModel: ContactsViewModel = viewModel()) {
 }
 
 @Composable
-fun ManageGroupMembersScreen(){
+fun ManageGroupMembersScreen() {
     val scalingLazyListState = rememberScalingLazyListState()
 
     Scaffold(

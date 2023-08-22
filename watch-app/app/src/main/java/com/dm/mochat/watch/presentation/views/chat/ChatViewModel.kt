@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dm.mochat.watch.core.Gesture
 import com.dm.mochat.watch.presentation.navigation.AppRouter
 import com.dm.mochat.watch.presentation.navigation.Screen
 import com.google.firebase.auth.FirebaseAuth
@@ -60,47 +61,17 @@ class ChatViewModel : ViewModel() {
     }
 
     fun selectRecipient(email: String, name: String) {
-        _recipientEmail.value = email
-        _recipientName.value = name
+        _recipientEmail.postValue(email)
+        _recipientName.postValue(name)
     }
 
     fun updateMessage(newMessage: String) {
-        _message.value = newMessage
+        _message.postValue(newMessage)
     }
 
     fun simulateGesture() {
-        startTimer()
     }
 
-    private fun startTimer() {
-        _isDetecting.value = true
-
-        countDownTimer = object : CountDownTimer(3000, 10) {
-
-            override fun onTick(millisRemaining: Long) {
-                _timerProgress.value = millisRemaining.toFloat() / 3000
-            }
-
-            override fun onFinish() {
-                _timerProgress.value = 0F
-                countDownTimer?.cancel()
-
-
-                viewModelScope.launch {
-                    delay(1000)
-
-                    updateMessage("Let's go!")      // TO CHANGE
-
-                    resetTimer()
-                }
-            }
-        }.start()
-    }
-
-    private fun resetTimer() {
-        _isDetecting.value = false
-        _timerProgress.value = 1.0F
-    }
 
     fun sendMessage() {
         val message: String = _message.value ?: throw IllegalArgumentException("message empty")
@@ -122,6 +93,19 @@ class ChatViewModel : ViewModel() {
                 _message.value = ""
                 AppRouter.navigateTo(Screen.HomeScreen)
             }
+        }
+    }
+
+
+    fun getMessageFromGesture(gesture: Gesture):String {
+        return when(gesture){
+            Gesture.Left -> "Left"
+            Gesture.Right -> "Right"
+            Gesture.Up -> "Up"
+            Gesture.Down -> "Down"
+            Gesture.CircleIn -> "CircleIn"
+            Gesture.CircleOut -> "CircleOut"
+            else -> throw IllegalArgumentException("unknown gesture")
         }
     }
 }

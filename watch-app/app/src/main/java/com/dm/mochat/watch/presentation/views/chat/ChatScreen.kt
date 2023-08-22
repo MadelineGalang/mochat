@@ -1,5 +1,6 @@
 package com.dm.mochat.watch.presentation.views.chat
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +38,8 @@ import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
 import androidx.wear.compose.material.rememberScalingLazyListState
 import androidx.wear.compose.material.rememberSwipeToDismissBoxState
+import com.dm.mochat.watch.core.Gesture
+import com.dm.mochat.watch.presentation.components.GestureNavigableView
 import com.dm.mochat.watch.presentation.components.IconButtonComponent
 import com.dm.mochat.watch.presentation.components.LargeTextComponent
 import com.dm.mochat.watch.presentation.components.TextFieldWithValueComponent
@@ -60,96 +63,138 @@ fun ChatScreen(chatViewModel: ChatViewModel = viewModel()) {
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
     )
 
-    SwipeToDismissBox(
-        onDismissed = { AppRouter.navigateTo(Screen.RecipientScreen) },
-        state = swipeToDismissBoxState
-    ) { isBackground ->
-        if (isBackground) {
-            Box(modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.background))
-        } else {
-            Scaffold(
-                timeText = { TimeText() },
-                vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
-                positionIndicator = { PositionIndicator(scalingLazyListState = scalingLazyListState) }
-            ) {
-                ScalingLazyColumn(
+    GestureNavigableView(onGestureDetected = { gesture, viewModel ->
+        when (gesture) {
+            Gesture.Left -> {
+                // previous message
+                Log.d("Gesture Navigation", "Previous message")
+            }
+
+            Gesture.Right -> {
+                // next message
+                Log.d("Gesture Navigation", "Next message")
+            }
+
+            Gesture.Up -> {
+
+            }
+
+            Gesture.Down -> {
+                // back to conversations
+                Log.d("Gesture Navigation", "back to conversations")
+            }
+
+            Gesture.CircleIn -> {
+                // repeat current message
+                Log.d("Gesture Navigation", "repeat current message")
+            }
+
+            Gesture.CircleOut -> {
+                // send gesture message
+                Log.d("Gesture Navigation", "CircleOut")
+            }
+
+            Gesture.Unknown -> {
+                // Unknown
+                Log.d("Gesture Navigation", "Unknown")
+            }
+        }
+    }) {
+        SwipeToDismissBox(
+            onDismissed = { AppRouter.navigateTo(Screen.RecipientScreen) },
+            state = swipeToDismissBoxState
+        ) { isBackground ->
+            if (isBackground) {
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colors.background),
-                    contentPadding = PaddingValues(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    state = scalingLazyListState
+                        .background(MaterialTheme.colors.background)
+                )
+            } else {
+                Scaffold(
+                    timeText = { TimeText() },
+                    vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
+                    positionIndicator = { PositionIndicator(scalingLazyListState = scalingLazyListState) }
                 ) {
-                    item {
-                        LargeTextComponent(
-                            text = chatViewModel.recipient.value ?: ""
-                        )
-                    }
-
-                    item {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.spacedBy(5.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            TextFieldWithValueComponent(
-                                value = message,
-                                placeholder = "Message",
-                                onTextChange = {
-                                    chatViewModel.updateMessage(it)
-                                },
-                                singleLine = false
+                    ScalingLazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colors.background),
+                        contentPadding = PaddingValues(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        state = scalingLazyListState
+                    ) {
+                        item {
+                            LargeTextComponent(
+                                text = chatViewModel.recipient.value ?: ""
                             )
-                            Text(
-                                text = "Perform gesture now",
-                                style = TextStyle(fontSize = 10.sp),
-                                color = NavyBlue,
-                                textAlign = TextAlign.Center
+                        }
+
+                        item {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(5.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                TextFieldWithValueComponent(
+                                    value = message,
+                                    placeholder = "Message",
+                                    onTextChange = {
+                                        chatViewModel.updateMessage(it)
+                                    },
+                                    singleLine = false
+                                )
+                                Text(
+                                    text = "Perform gesture now",
+                                    style = TextStyle(fontSize = 10.sp),
+                                    color = NavyBlue,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+
+                        item {
+                            IconButtonComponent(
+                                iconVector = Icons.Filled.Send,
+                                description = "Send message",
+                                onButtonClick = {
+                                    chatViewModel.sendMessage()
+                                }
+                            )
+                        }
+
+                        item {
+                            CompactChip(
+                                onClick = { chatViewModel.simulateGesture() },
+                                label = {
+                                    Text(text = "Simulate gesture")
+                                },
+                                colors = ChipDefaults.secondaryChipColors()
                             )
                         }
                     }
 
-                    item {
-                        IconButtonComponent(
-                            iconVector = Icons.Filled.Send,
-                            description = "Send message",
-                            onButtonClick = {
-                                chatViewModel.sendMessage()
-                            }
+                    if (isDetecting) {
+                        CircularProgressIndicator(
+                            startAngle = 300f,
+                            endAngle = 240f,
+                            progress = animatedProgress,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(all = 1.dp)
                         )
                     }
-
-                    item {
-                        CompactChip(
-                            onClick = { chatViewModel.simulateGesture() },
-                            label = {
-                                Text(text = "Simulate gesture")
-                            },
-                            colors = ChipDefaults.secondaryChipColors()
-                        )
-                    }
-                }
-
-                if (isDetecting) {
-                    CircularProgressIndicator(
-                        startAngle = 300f,
-                        endAngle = 240f,
-                        progress = animatedProgress,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(all = 1.dp)
-                    )
                 }
             }
         }
+
+        SystemBackButtonHandler {
+            AppRouter.navigateTo(Screen.RecipientScreen)
+        }
     }
 
-    SystemBackButtonHandler {
-        AppRouter.navigateTo(Screen.RecipientScreen)
-    }
+
 }
 
 @Preview(device = Devices.WEAR_OS_LARGE_ROUND, showSystemUi = true)
