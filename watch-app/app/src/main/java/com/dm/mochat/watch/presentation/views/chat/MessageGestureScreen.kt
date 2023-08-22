@@ -6,6 +6,7 @@ import android.hardware.SensorManager
 import android.os.CountDownTimer
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.speech.tts.TextToSpeech
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,16 +43,19 @@ import androidx.wear.compose.material.VignettePosition
 import com.dm.mochat.watch.core.ApiMessageGestureDetector
 import com.dm.mochat.watch.core.Gesture
 import com.dm.mochat.watch.core.GestureDataCollector
+import com.dm.mochat.watch.helper.TextToSpeechFactory
+import com.dm.mochat.watch.helper.TtsHelper.speakThenDo
 import com.dm.mochat.watch.presentation.components.GestureNavigableViewModel
 import com.dm.mochat.watch.presentation.navigation.AppRouter
 import com.dm.mochat.watch.presentation.navigation.Screen
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Composable
 fun MessageGestureScreen(chatViewModel: ChatViewModel = viewModel()) {
-    var progress by remember { mutableStateOf(1f)}
+    var progress by remember { mutableStateOf(1f) }
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
@@ -60,8 +64,9 @@ fun MessageGestureScreen(chatViewModel: ChatViewModel = viewModel()) {
     val messageGestureDataCollector = GestureDataCollector(sensorManager)
     val messageGestureDataPredictor = ApiMessageGestureDetector()
     val vibrator = LocalContext.current.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    val tts = TextToSpeechFactory.instance
 
-    LaunchedEffect(null){
+    LaunchedEffect(null) {
         chatViewModel.selectRecipient(Screen.Data.map["email"]!!, Screen.Data.map["name"]!!)
         messageGestureDataCollector.start()
         val countDownTimer = object : CountDownTimer(1600, 10) {
@@ -73,14 +78,17 @@ fun MessageGestureScreen(chatViewModel: ChatViewModel = viewModel()) {
                 messageGestureDataCollector.stop()
                 vibrator.vibrate(VibrationEffect.createOneShot(150, 200))
                 val gestureData = messageGestureDataCollector.getGestureData()
-                messageGestureDataPredictor.predictGesture(gestureData){ gesture: Gesture ->
-                    GlobalScope.launch{
+                messageGestureDataPredictor.predictGesture(gestureData) { gesture: Gesture ->
+                    GlobalScope.launch {
                         chatViewModel.updateMessage(chatViewModel.getMessageFromGesture(gesture))
                     }
                     AppRouter.navigateTo(Screen.ConfirmMessageScreen)
                 }
             }
-        }.start()
+        }
+        tts.speakThenDo("Perform gesture", TextToSpeech.QUEUE_FLUSH, null, "Perform gesture") {
+            countDownTimer.start()
+        }
     }
 
     DisposableEffect(Unit) {

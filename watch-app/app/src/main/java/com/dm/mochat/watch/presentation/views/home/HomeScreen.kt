@@ -34,6 +34,8 @@ import androidx.wear.compose.material.VignettePosition
 import androidx.wear.compose.material.items
 import androidx.wear.compose.material.rememberScalingLazyListState
 import com.dm.mochat.watch.core.Gesture
+import com.dm.mochat.watch.helper.TextToSpeechFactory
+import com.dm.mochat.watch.helper.TtsHelper.speakThenDo
 import com.dm.mochat.watch.presentation.components.ButtonComponent
 import com.dm.mochat.watch.presentation.components.GestureNavigableView
 import com.dm.mochat.watch.presentation.components.IconButtonComponent
@@ -56,12 +58,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     val messages: List<Map<String, Any>> by homeViewModel.messages.observeAsState(
         initial = emptyList<Map<String, Any>>().toMutableList()
     )
-    lateinit var tts: TextToSpeech;
-    tts = TextToSpeech(LocalContext.current) {
-        if (it == TextToSpeech.SUCCESS) {
-            tts.language = Locale.US
-        }
-    }
+    val tts = TextToSpeechFactory.instance
     val scope = rememberCoroutineScope()
     val itemCountBeforeList = 3
     val itemCountAfterList = 1
@@ -104,14 +101,14 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
             }
 
             Gesture.Up -> {
-
+                viewModel.stopGestureDetection()
+                tts.speakThenDo("Viewing Contacts", TextToSpeech.QUEUE_FLUSH, null, "Send message"){
+                    AppRouter.navigateTo(Screen.RecipientScreen)
+                }
             }
 
             Gesture.Down -> {
-                // back to conversations
-                viewModel.stopGestureDetection()
-                AppRouter.navigateTo(Screen.HomeScreen)
-                Log.d("Gesture Navigation", "back to conversations")
+                tts.speak("Already at conversations", TextToSpeech.QUEUE_FLUSH, null, null)
             }
 
             Gesture.CircleIn -> {
@@ -129,21 +126,22 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
             Gesture.CircleOut -> {
                 Log.d("Gesture Navigation", "CircleOut")
                 viewModel.stopGestureDetection()
-                tts.speak("Navigating to contacts", TextToSpeech.QUEUE_FLUSH, null, null)
                 val currentIndex = scalingLazyListState.centerItemIndex
                 val messageIndex =
                     max(min(0, currentIndex - itemCountBeforeList + 1), messages.size - 1)
                 val currentMessage = messages[messageIndex]
                 val email =
-                    (currentMessage["sent_by"] as? Map<*, *>)?.get("name")?.toString() ?: "Unknown"
-                val name =
                     (currentMessage["sent_by"] as? Map<*, *>)?.get("email")?.toString() ?: "Unknown"
-                AppRouter.navigateTo(
-                    Screen.MessageGestureScreen, mapOf(
-                        "email" to email,
-                        "name" to name
+                val name =
+                    (currentMessage["sent_by"] as? Map<*, *>)?.get("name")?.toString() ?: "Unknown"
+                tts.speakThenDo("Send message to $name", TextToSpeech.QUEUE_FLUSH, null, "Send message"){
+                    AppRouter.navigateTo(
+                        Screen.MessageGestureScreen, mapOf(
+                            "email" to email,
+                            "name" to name
+                        )
                     )
-                )
+                }
             }
 
             Gesture.Unknown -> {

@@ -30,6 +30,8 @@ import androidx.wear.compose.material.items
 import androidx.wear.compose.material.rememberScalingLazyListState
 import androidx.wear.compose.material.rememberSwipeToDismissBoxState
 import com.dm.mochat.watch.core.Gesture
+import com.dm.mochat.watch.helper.TextToSpeechFactory
+import com.dm.mochat.watch.helper.TtsHelper.speakThenDo
 import com.dm.mochat.watch.presentation.components.ChipComponent
 import com.dm.mochat.watch.presentation.components.GestureNavigableView
 import com.dm.mochat.watch.presentation.components.LargeTextComponent
@@ -49,12 +51,7 @@ fun RecipientScreen(chatViewModel: ChatViewModel = viewModel()) {
     val recipients: List<Map<String, Any>> by chatViewModel.recipients.observeAsState(
         initial = emptyList<Map<String, Any>>().toMutableList()
     )
-    lateinit var tts: TextToSpeech;
-    tts = TextToSpeech(LocalContext.current){
-        if (it == TextToSpeech.SUCCESS) {
-            tts.language = Locale.US
-        }
-    }
+    val tts = TextToSpeechFactory.instance
     val scope = rememberCoroutineScope()
     val swipeToDismissBoxState = rememberSwipeToDismissBoxState()
     val scalingLazyListState = rememberScalingLazyListState()
@@ -91,7 +88,7 @@ fun RecipientScreen(chatViewModel: ChatViewModel = viewModel()) {
                 }
 
                 Gesture.Up -> {
-
+                    tts.speak("Already at contacts", TextToSpeech.QUEUE_FLUSH, null, null)
                 }
 
                 Gesture.Down -> {
@@ -116,10 +113,15 @@ fun RecipientScreen(chatViewModel: ChatViewModel = viewModel()) {
                     val currentIndex = max(scalingLazyListState.centerItemIndex, startingIndex)
                     val email = recipients[currentIndex-startingIndex]["email"].toString()
                     val name = recipients[currentIndex-startingIndex]["name"].toString()
-                    tts.speak("Selected $name", TextToSpeech.QUEUE_FLUSH, null, null)
-                    chatViewModel.selectRecipient(email, name)
                     viewModel.stopGestureDetection()
-                    AppRouter.navigateTo(Screen.MessageGestureScreen)
+                    chatViewModel.selectRecipient(email, name)
+                    tts.speakThenDo("Selected $name", TextToSpeech.QUEUE_FLUSH, null, "Send message"){
+                        AppRouter.navigateTo(Screen.MessageGestureScreen,  mapOf(
+                            "email" to email,
+                            "name" to name
+                        ))
+                    }
+
                 }
 
                 Gesture.Unknown -> {

@@ -14,9 +14,11 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
+import com.dm.mochat.watch.helper.TextToSpeechFactory
 import com.dm.mochat.watch.presentation.navigation.AppRouter
 import com.dm.mochat.watch.presentation.navigation.Screen
 import com.dm.mochat.watch.presentation.views.home.HomeScreen
@@ -48,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun WearApp() {
+    TextToSpeechFactory.configure(LocalContext.current)
     MoChatWatchTheme {
         Crossfade(targetState = AppRouter.currentScreen) { currentState ->
             when (currentState.value) {

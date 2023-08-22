@@ -5,6 +5,8 @@ import android.hardware.SensorManager
 import android.os.CountDownTimer
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -38,8 +40,11 @@ import com.dm.mochat.watch.core.ApiMessageGestureDetector
 import com.dm.mochat.watch.core.DelimiterGestureDetector
 import com.dm.mochat.watch.core.Gesture
 import com.dm.mochat.watch.core.GestureDataCollector
+import com.dm.mochat.watch.helper.TextToSpeechFactory
+import com.dm.mochat.watch.helper.TtsHelper.speakThenDo
 import com.dm.mochat.watch.presentation.navigation.AppRouter
 import com.dm.mochat.watch.presentation.navigation.Screen
+import java.util.Locale
 
 @Composable
 fun ConfirmMessageScreen(chatViewModel: ChatViewModel = viewModel()) {
@@ -49,28 +54,44 @@ fun ConfirmMessageScreen(chatViewModel: ChatViewModel = viewModel()) {
         animationSpec = ProgressIndicatorDefaults.ProgressAnimationSpec,
     )
     val vibrator = LocalContext.current.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-    val sensorManager = LocalContext.current.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    val sensorManager =
+        LocalContext.current.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    val tts = TextToSpeechFactory.instance
+    lateinit var countDownTimer: CountDownTimer
     val delimiterGestureDetector = DelimiterGestureDetector(sensorManager) {
         it.stop()
-        vibrator.vibrate(VibrationEffect.createOneShot(150, 200))
+        countDownTimer.cancel()
         chatViewModel.sendMessage()
-        AppRouter.navigateTo(Screen.HomeScreen)
+        vibrator.vibrate(VibrationEffect.createOneShot(150, 200))
+        val text = "Message sent"
+        tts.speakThenDo(text, TextToSpeech.QUEUE_FLUSH, null, "Send message"){
+            AppRouter.navigateTo(Screen.HomeScreen)
+        }
+    }
+    countDownTimer = object : CountDownTimer(1500, 10) {
+        override fun onTick(millisRemaining: Long) {
+            progress = millisRemaining.toFloat() / 1500
+        }
+
+        override fun onFinish() {
+            delimiterGestureDetector.stop()
+            val text = "Message canceled"
+            tts.speakThenDo(text, TextToSpeech.QUEUE_FLUSH, null, "Send message"){
+                AppRouter.navigateTo(Screen.HomeScreen)
+            }
+        }
     }
 
-    LaunchedEffect(null){
+
+
+    LaunchedEffect(null) {
         delimiterGestureDetector.start()
         vibrator.vibrate(VibrationEffect.createOneShot(150, 200))
-        val countDownTimer = object : CountDownTimer(1500, 10) {
-            override fun onTick(millisRemaining: Long) {
-                progress = millisRemaining.toFloat() / 1500
-            }
 
-            override fun onFinish() {
-                delimiterGestureDetector.stop()
-                AppRouter.navigateTo(Screen.HomeScreen)
-
-            }
-        }.start()
+        val text = "Do you want to say \"${chatViewModel.message.value}\" to ${chatViewModel.recipient.value}?"
+        tts.speakThenDo(text, TextToSpeech.QUEUE_FLUSH, null, "Send message"){
+            countDownTimer.start()
+        }
     }
 
     DisposableEffect(Unit) {

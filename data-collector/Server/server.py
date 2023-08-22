@@ -37,14 +37,14 @@ def post_data():
 
 @app.route('/prediction', methods=["POST"])
 def predict():
-    return (
-        # "left"
-        # "right"
-        # "up"
-        # "down"
-        # "circle_in"
-        "circle_out"
-    )
+    # return (
+    #     # "left"
+    #     # "right"
+    #     # "up"
+    #     # "down"
+    #     # "circle_in"
+    #     "circle_out"
+    # )
     data = request.json
     # load data
     acc_data = get_data_from_string(data["acc"])
