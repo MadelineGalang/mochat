@@ -44,9 +44,9 @@ class RegisterViewModel : ViewModel() {
 
     fun register() {
         createUserInFirebase(
-            name = "test2",
-            email = "test2@email.com",
-            password = "123456"
+            name = _name.value ?: throw IllegalArgumentException("name expected"),
+            email = _email.value ?: throw IllegalArgumentException("email expected"),
+            password = _password.value ?: throw IllegalArgumentException("password expected")
         )
     }
 

@@ -35,8 +35,8 @@ class LoginViewModel : ViewModel() {
 
     fun login() {
         loginUserWithFirebase(
-            email = "test1@email.com",
-            password = "123456"
+            email = _email.value ?: throw IllegalArgumentException("email expected"),
+            password = _password.value ?: throw IllegalArgumentException("password expected")
         )
     }
 

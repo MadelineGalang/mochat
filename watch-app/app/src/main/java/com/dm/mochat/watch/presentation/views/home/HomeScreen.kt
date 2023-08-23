@@ -6,7 +6,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddComment
 import androidx.compose.runtime.Composable
@@ -174,20 +177,6 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
 
                 }
 
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        LargeTextComponent(
-                            text = "Logged in as ${homeViewModel.currentUserName.value}"
-                        )
-                        NormalTextComponent(text = homeViewModel.currentUserEmail.value!!)
-                    }
-                }
-
 
                 items(messages) { m ->
                     val sender = (m["sent_by"] as? Map<*, *>)?.get("name")?.toString() ?: "Unknown"
@@ -200,6 +189,22 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
                         time = { Text(text = date, style = TextStyle(fontSize = 10.sp)) },
                     ) {
                         Text(message)
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(20.dp)) }
+
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        LargeTextComponent(
+                            text = "Logged in as ${homeViewModel.currentUserName.value}"
+                        )
+                        NormalTextComponent(text = homeViewModel.currentUserEmail.value!!)
                     }
                 }
 
